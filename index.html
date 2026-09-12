@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111111">
+<meta name="description" content="Riego Adaptativo - Sistema Administrativo">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Riego Adaptativo">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Riego Adaptativo — DEV</title>
+
+<script>
+function toggleNav(el){
+  var items = el.nextElementSibling;
+  if(!items||!items.classList.contains('nav-section-items')) return;
+  var isCollapsed = items.style.display === 'none';
+  if(isCollapsed){
+    items.style.display = '';
+    el.innerHTML = el.innerHTML.replace('▸','▾');
+  } else {
+    items.style.display = 'none';
+    el.innerHTML = el.innerHTML.replace('▾','▸');
+  }
+}
+</script>
+</head>
+<body>
+
+<div style="background:#7B4F00;color:#fff;text-align:center;padding:6px 12px;font-size:12px;font-weight:700;letter-spacing:.4px">
+  🧪 ENTORNO DE DESARROLLO — datos aislados de producción, no usar para clientes reales
+</div>
+<img id="logo-pdf-data" src="logo.png" style="display:none" alt="">
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">💧</div>
+    <div><div class="brand-name">Riego Adaptativo <span style="color:#FFB300">[DEV]</span></div><span class="brand-sub">Sistema Administrativo v1.0 — Fabricación y Presupuestos por líneas de producto</span></div>
+  </div>
+  <div style="position:relative;flex:1;max-width:400px;margin:0 auto">
+    <input id="global-search" type="text" placeholder="🔍 Buscar clientes, presupuestos, componentes..."
+      oninput="busquedaGlobal(this.value)"
+      style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;background:var(--surface2);color:var(--text)">
+    <div id="search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:0 4px 16px rgba(0,0,0,.4);z-index:9999;max-height:320px;overflow-y:auto;margin-top:2px"></div>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-ctx" id="tctx"></span>
+    <button class="btn btn-sm" title="Ver el manual completo" onclick="window.open('instructivo.html','_blank','width=1100,height=750,resizable=yes,scrollbars=yes')">❓ Ayuda</button>
+    <button class="install-btn" id="install-btn" onclick="instalarPWA()">📲 Instalar app</button>
+    <button class="btn btn-sm" style="background:#334155;color:#fff;border-color:#334155;margin-left:6px" title="Guardar snapshot y cerrar" onclick="vssSalir()">🚪 Salir</button>
+  </div>
+</div>
+
+<div class="layout">
+<nav class="sidebar">
+  <div class="ns collapsible" onclick="toggleNav(this)">📄 Comercial ▸</div>
+  <div class="nav-section-items">
+  <div class="ni" id="nav-presupuestos" onclick="goTo('presupuestos')"><span class="ni-icon">📄</span>Presupuestos</div>
+  <div class="ni" id="nav-gestion" onclick="goTo('gestion')"><span class="ni-icon">💰</span>Gestión económica</div>
+  <div class="ni" id="nav-actas" onclick="goTo('actas')"><span class="ni-icon">📋</span>Actas de conformidad</div>
+
+  </div>
+  <div class="ns collapsible" onclick="toggleNav(this)">👥 Clientes ▸</div>
+  <div class="nav-section-items">
+  <div class="ni on" id="nav-clientes" onclick="goTo('clientes')"><span class="ni-icon">🔍</span>Listado</div>
+  <div class="ni" id="nav-alta" onclick="goTo('alta')"><span class="ni-icon">➕</span>Alta de cliente</div>
+
+  </div>
+  <div class="ns collapsible" onclick="toggleNav(this)">💵 Finanzas ▸</div>
+  <div class="nav-section-items">
+  <div class="ni" id="nav-fondos" onclick="goTo('fondos')"><span class="ni-icon">🏦</span>Movimiento de fondos</div>
+
+  </div>
+  <div class="ns collapsible" onclick="toggleNav(this)">🏭 Logística ▸</div>
+  <div class="nav-section-items">
+  <div class="ni" id="nav-stock" onclick="goTo('stock')"><span class="ni-icon">📦</span>Stock actual</div>
+  <div class="ni" id="nav-catalogo" onclick="goTo('catalogo')"><span class="ni-icon">🗂️</span>Catálogo</div>
+  <div class="ni" id="nav-movimientos" onclick="goTo('movimientos')"><span class="ni-icon">🔄</span>Movimientos</div>
+  <div class="ni" id="nav-ordenes" onclick="goTo('ordenes')"><span class="ni-icon">🛒</span>Órdenes de compra</div>
+  <div class="ni" id="nav-proveedores" onclick="goTo('proveedores')"><span class="ni-icon">🏭</span>Proveedores</div>
+
+  </div>
+  <div class="ns collapsible" onclick="toggleNav(this)">🔧 Fabricación ▸</div>
+  <div class="nav-section-items">
+  <div class="ni" id="nav-fabricacion" onclick="goTo('fabricacion')"><span class="ni-icon">🔧</span>Órdenes de trabajo</div>
+  <div class="ni" id="nav-kit" onclick="goTo('kit')"><span class="ni-icon">🏭</span>Líneas de producto</div>
+
+  </div>
+  <div class="ns collapsible" onclick="toggleNav(this)">🔩 Instalaciones ▸</div>
+  <div class="nav-section-items">
+  <div class="ni" id="nav-instalaciones" onclick="goTo('instalaciones')"><span class="ni-icon">📋</span>Pedidos de instalación</div>
+  <div class="ni" id="nav-kitinst" onclick="goTo('kitinst')"><span class="ni-icon">🧰</span>Kit base instalación</div>
+
+  </div>
+  <div class="ns collapsible" onclick="toggleNav(this)">🛠️ Mantenimiento ▸</div>
+  <div class="nav-section-items">
+  <div class="ni" id="nav-mantenimientos" onclick="goTo('mantenimientos')"><span class="ni-icon">📋</span>Registros</div>
+  </div>
+
+  <div class="ns collapsible" onclick="toggleNav(this)">📊 Análisis ▸</div>
+  <div class="nav-section-items">
+  <div class="ni" id="nav-reportes" onclick="goTo('reportes')"><span class="ni-icon">📊</span>Reportes</div>
+
+  </div>
+  <div class="ns collapsible" onclick="toggleNav(this)">⚙️ Configuración ▸</div>
+  <div class="nav-section-items">
+  <div class="ni" id="nav-config" onclick="goTo('config')"><span class="ni-icon">🏢</span>Mi empresa</div>
+  <div class="ni" id="nav-versiones" onclick="goTo('versiones')"><span class="ni-icon">🔄</span>Versiones SW</div>
+  <div class="ni" id="nav-tipos" onclick="goTo('tipos')"><span class="ni-icon">📡</span>Tipos de sensor</div>
+
+  </div>
+  <div class="ns collapsible" onclick="toggleNav(this)">🗄️ Datos ▸</div>
+  <div class="nav-section-items">
+  <div class="ni" id="nav-backup" onclick="goTo('backup')"><span class="ni-icon">💾</span>Backup / Restaurar</div>
+
+  </div>
+  <div class="sidebar-foot">© 2026 Riego Adaptativo</div>
+</nav>
+
+<div class="main">
+  <div class="page-head">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="page-title" id="ptitle">Clientes</div>
+      <button onclick="abrirAyudaPanel()" title="Ayuda de esta sección" style="background:#B71C1C;border:none;color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:800;cursor:pointer;padding:0;line-height:1;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.3)">?</button>
+    </div>
+    <div class="page-acts" id="pacts"></div>
+  </div>
+  <div class="content">
+
+    <!-- CLIENTES -->
+    <div class="panel on" id="panel-clientes">
+      <div class="stats stats-6" id="stats-box"></div>
+      <div class="sbar">
+        <input type="text" id="qc" placeholder="🔍 Buscar nombre, lote o barrio..." oninput="renderClientes()">
+        <select id="fc-modelo" onchange="renderClientes()">
+          <option value="">Todos los modelos</option>
+          <option>Base</option><option>Energy</option><option>Comfort</option><option>Black</option>
+        </select>
+        <select id="fc-estado" onchange="renderClientes()">
+          <option value="">Todos</option><option>Activo</option><option>Baja</option>
+        </select>
+      </div>
+      <div class="card">
+        <div class="twrap">
+          <table>
+            <colgroup><col style="width:4%"><col style="width:20%"><col style="width:9%"><col style="width:11%"><col style="width:12%"><col style="width:9%"><col style="width:9%"><col style="width:10%"><col style="width:16%"></colgroup>
+            <thead><tr><th>#</th><th>Cliente</th><th>Lote</th><th>Barrio</th><th>Teléfono</th><th>Modelo</th><th>Versión</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="tbody-c"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALTA -->
+    <div class="panel" id="panel-alta">
+      <div class="card">
+        <div class="card-head"><div class="card-title">👤 Datos del cliente</div></div>
+        <div class="card-body">
+          <div class="fg3">
+            <div class="fg"><label>Nombre / razón social *</label><input id="an" placeholder="García, Juan Carlos"></div>
+            <div class="fg"><label>Lote / unidad *</label><input id="al" placeholder="Lote 42"></div>
+            <div class="fg"><label>Barrio</label><input id="aba" placeholder="Ej: Villa del Parque"></div>
+            <div class="fg"><label>Teléfono *</label><input id="at" placeholder="+54 9 261..."></div>
+            <div class="fg"><label>Modelo Zpro</label>
+              <select id="am"><option>Base</option><option>Energy</option><option>Comfort</option><option>Black</option></select>
+            </div>
+            <div class="fg"><label>Versión instalada</label><input id="av" placeholder="v2.4.1"></div>
+            <div class="fg"><label>Fecha instalación</label><input id="af" type="date"></div>
+            <div class="fg"><label>MAC del ESP32</label><input id="amac" placeholder="A4:CF:12:7B:3E:01" style="font-family:monospace"></div>
+            <div class="fg"><label>PIN OTA</label><input id="apin" type="password" placeholder="PIN"></div>
+            <div class="fg"><label>Chat ID Telegram</label><input id="achat" placeholder="123456789" style="font-family:monospace"></div>
+      <div class="fg"><label>Email</label><input id="aemail" type="email" placeholder="cliente@email.com"></div>
+      <div class="fg"><label>Cantidad de ambientes</label><input id="aambientes" type="number" min="1" placeholder="Ej: 5"></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:7px">
+        <button class="btn" onclick="limpiarAlta()">✕ Limpiar</button>
+        <button class="btn btn-p" onclick="guardarCliente()">✔ Guardar cliente</button>
+      </div>
+    </div>
+
+    <!-- DETALLE -->
+    <div class="panel" id="panel-detalle">
+      <div id="det-head" style="margin-bottom:10px"></div>
+      <div class="subnav">
+        <div class="sni on" id="sni-datos" onclick="goSub('datos')">📋 Datos Zpro</div>
+        <div class="sni" id="sni-equipo" onclick="goSub('equipo')">🔧 Equipamiento</div>
+        <div class="sni" id="sni-zigbee" onclick="goSub('zigbee')">📡 Instalación Zigbee</div>
+        <div class="sni" id="sni-ota" onclick="goSub('ota')">🔄 Historial OTA</div>
+        <div class="sni" id="sni-mant" onclick="goSub('mant')">🛠️ Mantenimiento</div>
+      <div class="sni" id="sni-acta" onclick="goSub('acta')">📄 Acta</div>
+      </div>
+
+      <!-- SP DATOS -->
+      <div class="sp on" id="sp-datos">
+        <div class="card">
+          <div class="card-head"><div class="card-title">📋 Datos del cliente y equipo Zpro</div>
+            <button class="btn btn-sm" onclick="editarDatos()">✏️ Editar</button>
+          </div>
+          <div class="card-body" id="cont-datos"></div>
+        </div>
+      </div>
+
+      <!-- SP EQUIPO -->
+      <div class="sp" id="sp-equipo">
+        <div class="card">
+          <div class="card-head"><div class="card-title">🔧 Equipamiento provisto</div>
+            <button class="btn btn-sm" onclick="editarEquipo()">✏️ Editar</button>
+          </div>
+          <div class="card-body" id="cont-equipo"></div>
+        </div>
+      </div>
+
+      <!-- SP ZIGBEE -->
+      <div class="sp" id="sp-zigbee">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">📡 Dispositivos Zigbee instalados</div>
+            <button class="btn btn-sm btn-p" onclick="modalZigbee()">➕ Agregar dispositivo</button>
+          </div>
+          <div class="twrap" id="cont-zigbee"></div>
+        </div>
+      </div>
+
+      <!-- SP OTA -->
+      <div class="sp" id="sp-ota">
+        <div id="ota-stats" style="margin-bottom:10px"></div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">🔄 Historial de actualizaciones OTA</div>
+            <button class="btn btn-sm btn-p" onclick="modalOTA(-1)">➕ Registrar</button>
+          </div>
+          <div class="twrap" id="cont-ota"></div>
+        </div>
+      </div>
+
+      <!-- SP MANT -->
+      <div class="sp" id="sp-mant">
+        <div id="mant-stats" style="margin-bottom:10px"></div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">🛠️ Historial de mantenimiento</div>
+            <button class="btn btn-sm btn-p" onclick="modalMant(-1)">➕ Registrar visita</button>
+          </div>
+          <div class="twrap" id="cont-mant"></div>
+        </div>
+      </div>
+
+      <!-- SP ACTA -->
+      <div class="sp" id="sp-acta">
+        <div class="card">
+          <div class="card-head"><div class="card-title">📄 Acta de conformidad</div></div>
+          <div class="card-body" id="cont-acta"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FABRICACION -->
+    <div class="panel" id="panel-fabricacion">
+      <div class="sbar">
+        <input type="text" id="q-fab" placeholder="🔍 Buscar por N° serie, cliente..." oninput="renderFabricacion()">
+        <select id="fab-estado-filter" onchange="renderFabricacion()" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px">
+          <option value="">Todos los estados</option>
+          <option>En fabricación</option>
+          <option>Terminado</option>
+          <option>Entregado</option>
+          <option>Cancelado</option>
+        </select>
+        <button class="btn btn-p" onclick="modalNuevaOT()">➕ Nueva orden de trabajo</button>
+      </div>
+      <div class="stats stats-4" id="fab-stats"></div>
+      <div class="card">
+        <div class="twrap">
+          <table>
+            <thead><tr>
+              <th>N° Serie</th><th>Modelo</th><th>Lote</th><th>Cliente</th>
+              <th>Etapa actual</th><th>Estado</th><th>Fecha</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="tbody-fab"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- LINEAS DE PRODUCTO (reemplaza Kit de fabricación global — DEV) -->
+    <div class="panel" id="panel-kit">
+      <div class="sbar">
+        <div class="card-title" style="font-size:14px;font-weight:700">🏭 Líneas de producto</div>
+        <button class="btn btn-p" onclick="crearLineaProducto()">➕ Nueva línea</button>
+      </div>
+      <div id="lineas-list"></div>
+    </div>
+
+    <!-- INSTALACIONES -->
+    <div class="panel" id="panel-instalaciones">
+      <div class="sbar">
+        <input type="text" id="q-inst" placeholder="🔍 Buscar por N° pedido, cliente, N° serie..." oninput="renderInstalaciones()">
+        <select id="inst-estado-filter" onchange="renderInstalaciones()" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px">
+          <option value="">Todos los estados</option>
+          <option>Pendiente</option>
+          <option>En curso</option>
+          <option>Completado</option>
+          <option>Cancelado</option>
+        </select>
+      </div>
+      <div class="stats stats-4" id="inst-stats"></div>
+      <div class="card">
+        <div class="twrap">
+          <table>
+            <thead><tr>
+              <th>N° Pedido</th><th>N° Serie</th><th>Cliente</th><th>Modelo</th>
+              <th>Técnico</th><th>Fecha tent.</th><th>Estado</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="tbody-inst"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- KIT BASE INSTALACION -->
+    <div class="panel" id="panel-kitinst">
+      <div class="sbar">
+        <div class="card-title" style="font-size:14px;font-weight:700">🧰 Kit base de instalación</div>
+        <button class="btn btn-p" onclick="modalKitInstEditar()">✏️ Editar kit</button>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Materiales base para toda instalación</div>
+          <div style="font-size:11px;color:var(--text2)" id="kitinst-version"></div>
+        </div>
+        <div class="twrap">
+          <table>
+            <thead><tr>
+              <th>Código</th><th>Descripción</th><th style="text-align:center">Cantidad</th>
+              <th>Unidad</th><th style="text-align:center">Stock</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="tbody-kitinst"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTAS -->
+    <div class="panel" id="panel-actas">
+      <div class="sbar">
+        <input type="text" id="q-actas" placeholder="🔍 Buscar cliente..." oninput="renderActas()">
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">📋 Actas de conformidad</div></div>
+        <div class="twrap">
+          <table>
+            <thead><tr>
+              <th>N° Acta</th><th>Cliente</th><th>Modelo</th><th>Fecha inst.</th>
+              <th>Fecha firma</th><th>Estado</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="tbody-actas"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MANTENIMIENTOS -->
+    <div class="panel" id="panel-mantenimientos">
+      <div class="sbar">
+        <input type="text" id="q-mnt" placeholder="🔍 Buscar cliente, N° registro, tipo..." oninput="renderMantenimientos()">
+        <select id="mnt-tipo-filter" onchange="renderMantenimientos()" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px">
+          <option value="">Todos los tipos</option>
+          <option>Correctivo</option><option>Preventivo</option><option>Configuración</option>
+          <option>Actualización de firmware</option><option>Cambio de pilas</option>
+          <option>Garantía</option><option>Otro</option>
+        </select>
+        <select id="mnt-fact-filter" onchange="renderMantenimientos()" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px">
+          <option value="">Todos</option>
+          <option value="si">A facturar</option>
+          <option value="no">Sin facturar</option>
+        </select>
+        <button class="btn btn-p" onclick="modalNuevoMant()">➕ Nuevo</button>
+        <label class="btn btn-p" style="cursor:pointer">📥 Importar<input type="file" accept=".json" style="display:none" onchange="importarMant(this)"></label>
+        <button class="btn btn-p" onclick="vssSyncMantenimientoDrive()" style="color:#0D47A1;border-color:#0D47A1">☁️ Sincronizar desde Drive</button>
+      </div>
+      <div class="stats stats-4" id="mnt-stats-panel"></div>
+      <div class="card">
+        <div class="twrap">
+          <table>
+            <thead><tr>
+              <th>N°</th><th>Fecha</th><th>Cliente</th><th>Tipo</th>
+              <th>Motivo</th><th>Garantía</th><th>A facturar</th><th>Mat. $</th><th>MO $</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="tbody-mnt"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VERSIONES -->
+    <div class="panel" id="panel-versiones">
+      <div class="card">
+        <div class="card-head"><div class="card-title">📦 Versiones de software</div>
+          <button class="btn btn-sm btn-p" onclick="modalVersion()">➕ Nueva versión</button>
+        </div>
+        <div class="twrap"><table>
+          <thead><tr><th>Versión</th><th>Tipo</th><th>Fecha</th><th>Notas</th><th></th></tr></thead>
+          <tbody id="tbody-ver"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- TIPOS SENSOR -->
+    <div class="panel" id="panel-tipos">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">⚙️ Tipos de sensor Zigbee</div>
+          <div style="display:flex;gap:6px">
+            <input id="nuevo-tipo" placeholder="Nuevo tipo..." style="padding:4px 8px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;width:160px">
+            <button class="btn btn-sm btn-p" onclick="agregarTipo()">➕ Agregar</button>
+          </div>
+        </div>
+        <div class="card-body"><div id="tipos-list" style="display:flex;flex-wrap:wrap;gap:7px"></div></div>
+      </div>
+    </div>
+
+
+
+    <!-- STOCK -->
+    <div class="panel" id="panel-stock">
+      <div class="stats stats-5" id="stock-stats" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">📦 Stock actual</div>
+            <button class="btn btn-sm" onclick="pdfStock()">🖨️ PDF</button>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            <input type="text" id="q-stock" placeholder="🔍 Buscar..." oninput="renderStock()" style="padding:5px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;min-width:160px">
+            <select id="stock-cat-filter" onchange="renderStock()" style="padding:5px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px">
+              <option value="">Todas las categorías</option>
+            </select>
+            <select id="stock-area-filter" onchange="renderStock()" style="padding:5px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px">
+              <option value="">Todas las áreas</option>
+              <option>Fábrica</option><option>Mantenimiento</option><option>Instalacion</option>
+            </select>
+            <button class="btn btn-sm" onclick="toggleStockCritico()" id="btn-critico">⚠️ Solo críticos</button>
+          </div>
+        </div>
+        <div class="twrap">
+          <table>
+            <colgroup><col style="width:8%"><col style="width:19%"><col style="width:9%"><col style="width:7%"><col style="width:6%"><col style="width:9%"><col style="width:8%"><col style="width:7%"><col style="width:5%"><col style="width:7%"><col style="width:7%"><col style="width:2%"></colgroup>
+            <thead><tr>
+              <th id="sth-codigo" onclick="sortStock('codigo')" style="cursor:pointer;user-select:none">Código</th>
+              <th id="sth-desc" onclick="sortStock('desc')" style="cursor:pointer;user-select:none">Descripción ▲</th>
+              <th id="sth-categoria" onclick="sortStock('categoria')" style="cursor:pointer;user-select:none">Categoría</th>
+              <th id="sth-cant" onclick="sortStock('cant')" style="cursor:pointer;user-select:none">Stock</th>
+              <th>Mínimo</th>
+              <th id="sth-ubicacion" onclick="sortStock('ubicacion')" style="cursor:pointer;user-select:none">Ubicación</th>
+              <th>Proveedor</th>
+              <th id="sth-area" onclick="sortStock('area')" style="cursor:pointer;user-select:none">Área</th>
+              <th style="text-align:center">Estado</th>
+              <th style="text-align:right">Costo $</th>
+              <th style="text-align:right">Costo U$S</th>
+              <th>Acciones</th>
+            </tr></thead>
+            <tbody id="tbody-stock"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATÁLOGO -->
+    <div class="panel" id="panel-catalogo">
+      <div class="sbar">
+        <input type="text" id="q-cat" placeholder="🔍 Buscar componente..." oninput="renderCatalogo()">
+        <select id="cat-filter" onchange="renderCatalogo()" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px">
+          <option value="">Todas las categorías</option>
+        </select>
+        <select id="cat-prov-filter" onchange="renderCatalogo()" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px">
+          <option value="">Todos los proveedores</option>
+        </select>
+        <span id="cat-count" style="font-size:12px;color:var(--text2);white-space:nowrap;padding:0 4px"></span>
+        <button class="btn btn-p" onclick="modalComponente(-1)">➕ Nuevo componente</button>
+        <button class="btn btn-sm" onclick="pdfCatalogo()">🖨️ PDF</button>
+      </div>
+      <div class="card">
+        <div class="twrap">
+          <table>
+            <colgroup><col style="width:7%"><col style="width:17%"><col style="width:10%"><col style="width:6%"><col style="width:5%"><col style="width:7%"><col style="width:8%"><col style="width:8%"><col style="width:10%"><col style="width:5%"><col style="width:9%"></colgroup>
+            <thead id="thead-cat"><tr>
+              <th id="th-codigo" onclick="sortCatalogo('codigo')" style="cursor:pointer;user-select:none">Código</th>
+              <th id="th-desc" onclick="sortCatalogo('desc')" style="cursor:pointer;user-select:none">Descripción ▲</th>
+              <th id="th-categoria" onclick="sortCatalogo('categoria')" style="cursor:pointer;user-select:none">Categoría</th>
+              <th>Unidad</th><th>Mín.</th>
+              <th id="th-stock" onclick="sortCatalogo('stock')" style="cursor:pointer;user-select:none">Stock</th>
+              <th id="th-area" onclick="sortCatalogo('area')" style="cursor:pointer;user-select:none">Área</th>
+              <th id="th-ubicacion" onclick="sortCatalogo('ubicacion')" style="cursor:pointer;user-select:none">Ubicación</th><th>Proveedor</th><th style="text-align:center">Estado</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="tbody-cat"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOVIMIENTOS -->
+    <div class="panel" id="panel-movimientos">
+      <div class="sbar">
+        <input type="text" id="q-mov" placeholder="🔍 Buscar componente o referencia..." oninput="renderMovimientos()">
+        <select id="mov-tipo-filter" onchange="renderMovimientos()" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px">
+          <option value="">Todos los tipos</option>
+          <option>Entrada</option><option>Salida manual</option><option>Salida instalación</option>
+        </select>
+        <select id="mov-motivo-filter" onchange="renderMovimientos()" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px">
+          <option value="">Todos los motivos</option>
+        </select>
+        <select id="mov-origen-filter" onchange="renderMovimientos()" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px">
+          <option value="">Todos los orígenes</option>
+        </select>
+        <button class="btn btn-p" onclick="modalMovimiento('Entrada')">📥 Entrada</button>
+        <button class="btn" onclick="modalMovimiento('Salida manual')">📤 Salida</button>
+        <button class="btn btn-g" onclick="modalMovimiento('Salida instalación')">🔧 Instalación</button>
+      </div>
+      <div class="card">
+        <div class="twrap">
+          <table>
+            <colgroup><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:17%"><col style="width:6%"><col style="width:5%"><col style="width:7%"><col style="width:11%"><col style="width:11%"><col style="width:9%"></colgroup>
+            <thead><tr><th>Fecha</th><th>Tipo</th><th>Código</th><th>Componente</th><th>Cant.</th><th style="text-align:center">Estado</th><th>Precio $</th><th>Precio U$S</th><th>Referencia</th><th>Cliente / Nota</th><th>Origen</th><th></th></tr></thead>
+            <tbody id="tbody-mov"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÓRDENES -->
+    <div class="panel" id="panel-ordenes">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <input id="q-ord" type="text" placeholder="🔍 N° OC, proveedor..." oninput="renderOrdenes()" style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;max-width:260px">
+        <div style="display:flex;gap:8px">
+        <button class="btn btn-p" onclick="generarOrdenAutomatica()">⚡ Generar orden automática</button>
+        <button class="btn" onclick="modalOrden()">➕ Nueva orden manual</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="twrap">
+          <table>
+            <colgroup><col style="width:10%"><col style="width:12%"><col style="width:30%"><col style="width:10%"><col style="width:10%"><col style="width:18%"><col style="width:10%"></colgroup>
+            <thead><tr><th>N° OC</th><th>Fecha</th><th>Estado</th><th>Componentes</th><th>Proveedor</th><th>Total est.</th><th>Observaciones</th><th>Acciones</th></tr></thead>
+            <tbody id="tbody-ord"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- PRESUPUESTOS -->
+    <div class="panel" id="panel-presupuestos">
+      <div class="sbar">
+        <input type="text" id="qp" placeholder="Buscar por nombre o dirección..." oninput="renderPresupuestos()">
+        <select id="fp-estado" onchange="renderPresupuestos()">
+          <option value="">Todos los estados</option>
+          <option>Borrador</option><option>Enviado</option><option>Aprobado</option><option>Rechazado</option>
+        </select>
+        <label class="btn" style="cursor:pointer;margin-bottom:0">
+          📥 Importar relevamiento
+          <input type="file" accept=".json" id="import-rel" style="display:none" onchange="importarRelevamiento(this)">
+        </label>
+        <button class="btn btn-p" onclick="vssSyncRelevamientosDrive()" style="color:#0D47A1;border-color:#0D47A1">☁️ Sincronizar desde Drive</button>
+        <button class="btn btn-p" onclick="nuevoPresupuesto()">➕ Nuevo manual</button>
+      </div>
+      <div class="card">
+        <div class="twrap">
+          <table>
+            <colgroup><col style="width:20%"><col style="width:14%"><col style="width:10%"><col style="width:8%"><col style="width:10%"><col style="width:10%"><col style="width:28%"></colgroup>
+            <thead><tr><th>Cliente</th><th>Dirección</th><th>Línea</th><th>Fecha</th><th>Técnico</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="tbody-pres"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTES -->
+    <div class="panel" id="panel-reportes">
+      <div class="card" style="margin-bottom:10px">
+        <div class="ch"><div class="ct">📊 Reportes de gestión</div></div>
+        <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button class="btn" onclick="reporteClientes()">👥 Clientes por modelo</button>
+          <button class="btn" onclick="reportePresupuestos()">📄 Presupuestos por período</button>
+          <button class="btn" onclick="reporteStockCritico()">⚠️ Stock crítico</button>
+          <button class="btn" onclick="reporteUbicaciones()">📦 Contenido por caja</button>
+          <button class="btn" onclick="reporteInventario()">📦 Valor inventario por área</button>
+          <button class="btn" onclick="reporteMovimientos()">🔄 Movimientos por período</button>
+          <button class="btn" onclick="reporteMantenimiento()">🔧 Clientes sin mantenimiento</button>
+          <button class="btn" onclick="reporteOTA()">📡 Firmware instalado</button>
+          <button class="btn" onclick="reportePendientes()">⏳ Presupuestos sin respuesta</button>
+          <button class="btn" onclick="reporteStockPrecios()">💲 Stock con precios</button>
+          <button class="btn" onclick="reporteOCporProveedor()">🛒 OC por proveedor</button>
+          <button class="btn" onclick="reporteMantenimientos()">🛠️ Historial de mantenimientos</button>
+          <button class="btn" onclick="reporteInstalaciones()">🔧 Estado de instalaciones</button>
+          <button class="btn" onclick="reporteVencimientos()">⏰ Vencimientos de garantía</button>
+          <button class="btn" onclick="reporteHistorialPres()">📋 Historial de presupuestos</button>
+          <button class="btn" onclick="reporteSalidasPorMotivo()">📤 Salidas por motivo</button>
+          <button class="btn" onclick="reporteEntradasPorOrigen()">📥 Entradas por origen</button>
+        </div>
+      </div>
+      <div id="reporte-resultado"></div>
+    </div>
+
+    <!-- REPORTES -->
+    <div class="panel" id="panel-reportes">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+        <button class="btn btn-p" onclick="renderReportes()">🔄 Actualizar</button>
+      </div>
+      <div id="reportes-body"></div>
+    </div>
+
+    <!-- CONFIG -->
+    <div class="panel" id="panel-config">
+      <div class="card">
+        <div class="ch">
+          <div class="ct">⚙️ Datos de mi empresa</div>
+          <button class="btn btn-p" onclick="saveConfig();alert('Datos guardados.')">💾 Guardar</button>
+        </div>
+        <div class="card-body" id="config-body"></div>
+      </div>
+    </div>
+
+    <!-- FONDOS -->
+    <div class="panel" id="panel-fondos">
+      <div class="card">
+        <div class="ch"><div class="ct">🏦 Movimiento de fondos</div></div>
+        <div class="card-body" id="fondos-body"></div>
+      </div>
+    </div>
+
+    <!-- PROVEEDORES -->
+    <div class="panel" id="panel-proveedores">
+      <div class="card">
+        <div class="ch"><div class="ct">🏭 Proveedores</div></div>
+        <div class="card-body" id="prov-body"></div>
+      </div>
+    </div>
+
+    <!-- GESTION ECONOMICA -->
+    <div class="panel" id="panel-gestion">
+      <div class="card">
+        <div class="ch"><div class="ct">💰 Gestión económica</div></div>
+        <div class="card-body" id="gestion-body"></div>
+      </div>
+    </div>
+
+    <!-- BACKUP -->
+    <div class="panel" id="panel-backup">
+      <div class="card">
+        <div class="card-head"><div class="card-title">💾 Backup y restauración de datos</div></div>
+        <div class="card-body">
+          <div style="margin-bottom:20px">
+            <div class="sectitle">Snapshots locales</div>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:10px">La app guarda una copia automática en este dispositivo cada vez que cerrás la pestaña, minimizás o cambiás de ventana (hasta 10, se van rotando). El botón "🚪 Salir" de la barra superior fuerza un snapshot manual antes de cerrar.</p>
+            <button class="btn btn-p" onclick="vssMostrarSnapshots()">💾 Ver snapshots locales</button>
+          </div>
+          <hr class="div">
+          <div style="margin-bottom:20px">
+            <div class="sectitle">Carpeta local</div>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Vinculá una carpeta de tu PC (por ejemplo, tu carpeta de OneDrive o Google Drive sincronizada) y la app va a mantener ahí un archivo <code>riego_backup_&lt;fecha&gt;.json</code> actualizado cada vez que se guarda un cambio — sin tocar nada manualmente. Se conservan los últimos 7 backups por fecha. Requiere Chrome o Brave.</p>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <button class="btn btn-p" onclick="vssSeleccionarCarpeta()">📂 Elegir carpeta local</button>
+              <span id="vss-carpeta-status" style="font-size:12px;color:var(--text2)">➖ No vinculada</span>
+            </div>
+          </div>
+          <hr class="div">
+          <div style="margin-bottom:20px">
+            <div class="sectitle">Google Drive</div>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Conectá tu cuenta de Google y la app va a mantener sola un backup actualizado en una carpeta <code>RiegoAdaptativo</code> de tu Drive (archivo <code>backup_autosync.json</code>), sincronizando en segundo plano cada vez que hay cambios. También podés subir una copia con fecha a mano, o restaurar cualquier backup guardado ahí.</p>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+              <button class="btn btn-p" onclick="vssDriveSubir()">☁️ Subir backup a Drive</button>
+              <button class="btn" onclick="vssDriveRestaurar()" style="color:var(--blue);border-color:var(--blue)">📂 Restaurar backup de Drive</button>
+            </div>
+            <span id="vss-drive-badge" style="font-size:12px;color:var(--text2)">➖ Drive: sin conectar</span>
+          </div>
+          <hr class="div">
+          <div style="margin-bottom:20px">
+            <div class="sectitle">Exportar datos</div>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Descarga todos los datos en un archivo JSON, para guardar a mano donde quieras.</p>
+            <button class="btn btn-p" onclick="exportarJSON()">⬇️ Exportar JSON (backup)</button>
+          </div>
+          <hr class="div">
+          <div style="margin-bottom:20px">
+            <div class="sectitle">Importar / restaurar</div>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Carga un archivo de backup previamente exportado. <strong>Atención:</strong> reemplaza todos los datos actuales.</p>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="file" id="import-file" accept=".json" style="font-size:12px">
+              <button class="btn btn-g" onclick="importarJSON()">⬆️ Restaurar backup</button>
+            </div>
+          </div>
+          <hr class="div">
+          <div style="margin-bottom:20px">
+            <div class="sectitle">Importar registro de mantenimiento</div>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Importar un registro completado desde la app móvil. Se adosa automáticamente a la ficha del cliente.</p>
+            <label class="btn" style="cursor:pointer;display:inline-block">📥 Importar mantenimiento<input type="file" accept=".json" style="display:none" onchange="importarMant(this)"></label>
+            <button class="btn" onclick="vssSyncMantenimientoDrive()" style="margin-left:8px;color:#0D47A1;border-color:#0D47A1">☁️ Sincronizar desde Drive</button>
+          </div>
+          <hr class="div">
+          <div style="margin-bottom:20px">
+            <div class="sectitle">Borrar todo excepto logística</div>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Borra clientes, presupuestos, movimientos de fondos, fabricación, instalaciones y finanzas. <strong>Preserva</strong> todo el catálogo, stock, proveedores, OC, movimientos de stock, kits y configuración.</p>
+            <button class="btn btn-d" onclick="borrarExceptoLogistica()" style="background:#6A1B9A">🗑️ Borrar todo excepto logística</button>
+          </div>
+          <hr class="div">
+          <div style="margin-bottom:20px">
+            <div class="sectitle">Reiniciar datos operativos</div>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Borra clientes, presupuestos, movimientos de stock, órdenes de compra, fabricación, instalaciones y finanzas. <strong>Preserva</strong> catálogo, proveedores, configuración, kits y versiones SW.</p>
+            <button class="btn btn-d" onclick="reiniciarOperativo()" style="background:#E65100">🔄 Reiniciar datos operativos</button>
+          </div>
+          <hr class="div">
+          <div style="margin-bottom:20px">
+            <div class="sectitle">Borrar todos los datos</div>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Elimina todos los clientes, dispositivos, historial y configuración. <strong>Esta acción no se puede deshacer.</strong> Recomendamos exportar un backup antes.</p>
+            <button class="btn btn-d" onclick="borrarTodo()">🗑️ Borrar todos los datos</button>
+          </div>
+          <hr class="div">
+          <div>
+            <div class="sectitle">Información de la base de datos</div>
+            <div class="fgrid" id="backup-info"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">📲 Instalación como PWA</div></div>
+        <div class="card-body">
+          <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Para instalar esta app en tu dispositivo como si fuera una aplicación nativa, el sistema debe estar publicado en un servidor web (no como archivo local). Opciones recomendadas:</p>
+          <div class="fgrid">
+            <div class="fbox"><div class="fl">GitHub Pages</div><div class="fv" style="font-size:11px;margin-top:4px">Gratis. Subís el archivo a GitHub y queda publicado en una URL fija.</div></div>
+            <div class="fbox"><div class="fl">Netlify</div><div class="fv" style="font-size:11px;margin-top:4px">Gratis. Arrastrás la carpeta al sitio y obtenés URL en segundos.</div></div>
+            <div class="fbox"><div class="fl">Servidor local</div><div class="fv" style="font-size:11px;margin-top:4px">XAMPP o Node.js en tu PC. La URL sería localhost.</div></div>
+          </div>
+          <p style="font-size:11px;color:var(--text3);margin-top:8px">Los archivos manifest.json y sw.js ya están preparados en el código. Solo necesitás publicar.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<div id="mbox"></div>
+
+<script>
+(function(){
+  var v = Date.now();
+  var css = document.createElement('link');
+  css.rel = 'stylesheet'; css.href = 'app.css?v=' + v;
+  document.head.appendChild(css);
+  var js = document.createElement('script');
+  js.src = 'app.js?v=' + v;
+  document.head.appendChild(js);
+})();
+</script>
+</body>
+</html>
