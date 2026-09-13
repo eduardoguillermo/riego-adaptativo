@@ -211,27 +211,31 @@
   <section class="section" id="presupuestos">
     <div class="section-header">
       <span class="section-icon">📄</span>
-      <div><div class="section-title">Presupuestos</div><div class="section-subtitle">Relevamientos y cotizaciones, de borrador a cliente <span class="badge badge-red">Configurable por línea en DEV</span></div></div>
+      <div><div class="section-title">Presupuestos</div><div class="section-subtitle">Relevamientos y cotizaciones, de borrador a cliente</div></div>
     </div>
     <p>Cada fila es una cotización con nombre, dirección, línea de producto, técnico y estado (<b>Borrador → Enviado → Aprobado / Rechazado</b>). Se puede cargar a mano ("➕ Nuevo manual") o importar desde la app móvil de relevamiento en campo.</p>
     <div class="tip">💡 Si el presupuesto es para alguien que ya es cliente, elegilo del desplegable "Cliente existente" arriba del formulario — completa nombre, teléfono, email, dirección y barrio solo, sin tener que volver a escribirlos.</div>
 
-    <h2>Tabla de precios configurable por línea <span class="badge badge-green">Nuevo</span></h2>
-    <p>El modal de presupuesto ya no trae fijo el catálogo de Zpro (Central, sensores Zigbee, etc.). Ahora, al elegir la <b>Línea de producto</b> arriba del todo, la tabla de "Cómputo de materiales y precios" se arma sola con los ítems que esa línea tenga configurados — agrupados en las secciones que definiste (Equipamiento, Mano de obra, o las que quieras).</p>
-    <p>Los ítems de cada línea se configuran desde <a href="#kit">Líneas de producto → ⚙️ Presupuesto</a>: un modal aparte donde agregás/editás/borrás ítems, cada uno con su sección. Si una línea todavía no tiene ítems cargados, el presupuesto lo avisa y te manda para allá.</p>
+    <h2>Cliente potencial</h2>
+    <p>El botón "➕ Cliente potencial", al lado del desplegable de cliente existente, crea un registro liviano con solo los datos básicos (nombre, teléfono, email, dirección, barrio) y estado <b>Potencial</b> — sin modelo ni datos de instalación. Sirve para dejar guardados los datos de alguien interesado sin necesidad de que ya sea cliente formal.</p>
+    <p>Mientras un cliente está en estado Potencial, sus pestañas de Equipamiento, Sensores de riego, Mantenimiento y Acta quedan bloqueadas en la ficha. Si el presupuesto vinculado se aprueba, "👤 Cliente Activo" completa los datos que faltan (lote, MAC, PIN, versión) sobre ese mismo registro y lo pasa a Activo — no se duplica. Si el presupuesto no se aprueba, el potencial queda disponible igual para otro presupuesto futuro o para armar una lista de contactos.</p>
+
+    <h2>Tabla de precios por línea de producto</h2>
+    <p>Al elegir la <b>Línea de producto</b> arriba del formulario, la tabla de "Cómputo de materiales y precios" se arma sola con los ítems que esa línea tenga configurados, agrupados en las secciones que se hayan definido (Equipamiento, Mano de obra, u otras).</p>
+    <p>Los ítems de cada línea se configuran desde <a href="#kit">Líneas de producto → ⚙️ Presupuesto</a>: un modal aparte donde se agregan, editan o borran ítems, cada uno con su sección. Si una línea todavía no tiene ítems cargados, el presupuesto lo avisa y ofrece ir directo a configurarlos.</p>
     <div class="note">📌 El nombre, teléfono, dirección y barrio del cliente son siempre los mismos campos, sin importar la línea — solo la parte de materiales/precios cambia según el producto elegido.</div>
-    <div class="warning">⚠️ Al cambiar la línea de un presupuesto ya cargado, se pierden los precios que tenía asignados a los ítems de la línea anterior (quedan guardados en los datos pero no se muestran). Pensado para elegir la línea una sola vez, al principio.</div>
+    <div class="warning">⚠️ Al cambiar la línea de un presupuesto ya cargado, se pierden de vista los precios que tenía asignados a los ítems de la línea anterior (quedan guardados en los datos pero no se muestran). Conviene elegir la línea una sola vez, al principio.</div>
 
     <h2>Importar relevamiento</h2>
     <p>"📥 Importar relevamiento" lee el archivo JSON que exporta la app móvil (<code>riego-adaptativo-relevamiento</code>). Cada relevamiento entra como presupuesto en estado Borrador; si el mismo relevamiento ya se había importado antes, no se duplica.</p>
-    <p>"☁️ Sincronizar desde Drive" hace lo mismo sin ningún archivo de por medio: la app móvil sube directo a Google Drive los relevamientos que marcás como Aprobados ahí, y este botón los trae — mismo criterio de duplicados que la importación manual.</p>
-    <div class="note">📌 Los relevamientos importados no traen línea de producto asignada todavía — la app móvil de relevamiento no sabe de líneas de producto, solo relevanta datos del terreno — hay que elegirla a mano en el presupuesto una vez importado.</div>
+    <p>"☁️ Sincronizar desde Drive" hace lo mismo sin ningún archivo de por medio: la app móvil sube directo a Google Drive los relevamientos marcados como Aprobados ahí, y este botón los trae — mismo criterio de duplicados que la importación manual.</p>
+    <div class="note">📌 Los relevamientos importados no traen línea de producto asignada todavía — la app móvil de relevamiento no maneja líneas de producto, solo releva datos del terreno — hay que elegirla a mano en el presupuesto una vez importado.</div>
 
     <h2>PDF y envío por email</h2>
-    <p>"📄 PDF" abre el presupuesto en una pestaña nueva, lista para "🖨️ Imprimir / Guardar PDF". "📧 Email" abre Gmail con destinatario, asunto y cuerpo ya completados — pero <b>no adjunta el PDF</b>, eso ningún sitio lo puede hacer por vos por seguridad del navegador. El flujo correcto es: generar y guardar el PDF primero, después usar "Email" y adjuntarlo a mano (📎) antes de enviar. El botón te lo recuerda con un aviso cada vez que lo tocás.</p>
+    <p>"📄 PDF" abre el presupuesto en una pestaña nueva, lista para "🖨️ Imprimir / Guardar PDF". "📧 Email" abre Gmail con destinatario, asunto y cuerpo ya completados — pero <b>no adjunta el PDF</b>, eso ningún sitio puede hacerlo por razones de seguridad del navegador. El flujo correcto es generar y guardar el PDF primero, y después usar "Email" para adjuntarlo a mano (📎) antes de enviar. El botón recuerda este paso con un aviso cada vez que se usa.</p>
 
     <h2>Cliente Activo</h2>
-    <p>Un presupuesto <b>Aprobado</b> se convierte en cliente con el botón "👤 Cliente Activo": pasa a la pantalla de Alta con nombre, teléfono, dirección, email y ambientes ya cargados — solo falta completar lote, MAC, PIN OTA y versión instalada.</p>
+    <p>Un presupuesto <b>Aprobado</b> se convierte en cliente con el botón "👤 Cliente Activo": pasa a la pantalla de Alta con nombre, teléfono, dirección, email y ambientes ya cargados — solo falta completar lote, MAC, PIN OTA y versión instalada. Una vez convertido, el vínculo con el cliente ("✔ Cliente: nombre") se sigue mostrando aunque el presupuesto cambie de estado más adelante.</p>
     <div class="note">📌 Un presupuesto aprobado es también el punto de entrada de <a href="#gestion">Gestión económica</a> y de una <a href="#fabricacion">orden de trabajo "desde presupuesto"</a> — todo el circuito comercial cuelga de ese estado.</div>
   </section>
 
@@ -243,7 +247,7 @@
     </div>
     <p>Una gestión se crea eligiendo un presupuesto aprobado (trae el monto total calculado y la forma de pago ya cargados) y registra: monto del sistema, adelanto, fecha de entrega prometida vs. real, y una lista de pagos de saldo. El saldo pendiente se recalcula solo: <code>monto total − adelanto − suma de pagos registrados</code>.</p>
     <p>Cada gestión tiene su propio PDF de resumen ("📄 PDF").</p>
-    <h2>Sincronización automática con Fondos <span class="badge badge-green">Nuevo</span></h2>
+    <h2>Sincronización automática con Fondos</h2>
     <p>El adelanto y cada pago de saldo generan (o actualizan) su propio ingreso en <a href="#fondos">Movimiento de fondos</a> — rubro "Anticipos por ventas" — sin necesidad de cargarlo dos veces. Si cambiás el monto del adelanto en una gestión ya existente, el ingreso vinculado en Fondos se actualiza solo; cada pago de saldo nuevo genera un ingreso propio. Al eliminar una gestión, se pregunta si también querés borrar esos movimientos vinculados en Fondos o dejarlos sueltos.</p>
   </section>
 
@@ -264,11 +268,11 @@
       <span class="section-icon">🔍</span>
       <div><div class="section-title">Listado y alta de clientes</div><div class="section-subtitle">El registro central de instalaciones AquaSeries</div></div>
     </div>
-    <p>El listado se filtra por texto (nombre, lote o barrio), modelo AquaSeries (AquaOne / AquaDuo / AquaTrio / AquaPro / AquaMax) y estado (Activo / Baja). Un cliente dado de baja no se borra — queda marcado y se puede reactivar en cualquier momento.</p>
+    <p>El listado se filtra por texto (nombre, lote o barrio), modelo AquaSeries (AquaOne / AquaDuo / AquaTrio / AquaPro / AquaMax) y estado (Activo / Potencial / Baja). Un cliente dado de baja no se borra — queda marcado y se puede reactivar en cualquier momento. Un cliente Potencial solo se activa aprobando el presupuesto vinculado (ver <a href="#presupuestos">Presupuestos</a>).</p>
     <h2>Alta manual</h2>
     <p>Datos obligatorios: nombre, lote, teléfono. El resto (barrio, modelo, versión instalada, fecha de instalación, MAC del ESP32, PIN OTA, Chat ID de Telegram, email, cantidad de ambientes) se puede completar después desde la ficha. Un alta manual es independiente del circuito de presupuesto → conversión — sirve para cargar clientes ya instalados o históricos.</p>
     <h2>Dar de baja vs. Eliminar</h2>
-    <p>"🚫 Baja" es reversible y no rompe nada — el cliente queda marcado como inactivo y se puede reactivar cuando quieras. "🗑️ Eliminar cliente" es permanente y, antes de confirmar, la app te avisa cuántas órdenes de trabajo, pedidos de instalación, registros de mantenimiento, movimientos de fondos y gestiones económicas quedan sin vínculo al cliente real (no se borran ni se actualizan, solo pierden la referencia). Si necesitás conservar ese historial, usá "Dar de baja" en lugar de eliminar.</p>
+    <p>"🚫 Baja" es reversible y no rompe nada — el cliente queda marcado como inactivo y se puede reactivar cuando haga falta. "🗑️ Eliminar cliente" es permanente y, antes de confirmar, avisa cuántas órdenes de trabajo, pedidos de instalación, registros de mantenimiento, movimientos de fondos, gestiones económicas y presupuestos vinculados quedan sin vínculo al cliente real (no se borran ni se actualizan, solo pierden la referencia). Si hace falta conservar ese historial, conviene usar "Dar de baja" en lugar de eliminar.</p>
   </section>
 
   <!-- FICHA CLIENTE -->
@@ -347,38 +351,38 @@
   <section class="section" id="fabricacion">
     <div class="section-header">
       <span class="section-icon">🔧</span>
-      <div><div class="section-title">Órdenes de trabajo (Fabricación)</div><div class="section-subtitle">Fases y tareas configurables por línea de producto <span class="badge badge-red">Rediseñado en DEV</span></div></div>
+      <div><div class="section-title">Órdenes de trabajo (Fabricación)</div><div class="section-subtitle">Fases y tareas configurables por línea de producto</div></div>
     </div>
-    <div class="note">📌 Esta versión DEV reemplaza por completo el motor fijo que tenía Zpro (5 fases hardcodeadas). Ahora cada línea de producto define sus propias fases, tareas y kit — ver <a href="#kit">Líneas de producto</a>. No hay ninguna línea precargada: hay que crear al menos una antes de poder cargar una OT.</div>
+    <div class="note">📌 Cada línea de producto define sus propias fases, tareas y kit de materiales — ver <a href="#kit">Líneas de producto</a>. Hace falta crear al menos una línea antes de poder cargar una orden de trabajo.</div>
 
-    <p>Una orden de trabajo (OT) se crea siempre <b>manual</b>: elegís la línea de producto, el origen (Manual para stock, o Desde presupuesto aprobado — vincula el cliente y lo pasa a estado "Programado"), y el N° de lote. El número de serie se genera solo con un esquema genérico según el nombre de la línea, por ejemplo <code>OT-SENS2609-01-001</code>.</p>
+    <p>Una orden de trabajo (OT) se crea siempre <b>manual</b>: se elige la línea de producto, el origen (Manual para stock, o Desde presupuesto aprobado — vincula el cliente y lo pasa a estado "Programado"), y el N° de lote. El número de serie se genera solo con un esquema según el nombre de la línea, por ejemplo <code>OT-SENS2609-01-001</code>.</p>
 
     <h2>Inicio de fabricación</h2>
     <p>Al iniciar la OT, el sistema compara el <a href="#kit">kit de la línea</a> contra el stock disponible; si falta algún material avisa antes de continuar (se puede igual seguir adelante). Confirmar el inicio da salida de stock a todo el kit de una vez y lo asigna como materiales en uso de esa OT — desde ahí también se puede sumar consumo adicional o devolver materiales sobrantes.</p>
 
     <h2>Fases dinámicas</h2>
     <p>Cada línea define su propia cantidad de fases, cada una con su propia lista de tareas — no hay un número fijo. Se completa fase por fase y no se puede saltear. Cada fase tiene además responsable, fecha y observaciones libres.</p>
-    <div class="tip">💡 El checklist de tareas es <b>informativo por defecto</b> — no bloquea el avance. Si activás "Exigir todas las tareas tildadas" en la línea, el botón "Completar etapa" se deshabilita hasta tildar todo, y aparece un aviso listando exactamente qué tareas faltan (se actualiza solo, sin importar el orden en que las tildes).</div>
+    <div class="tip">💡 El checklist de tareas es <b>informativo por defecto</b> — no bloquea el avance. Activando "Exigir todas las tareas tildadas" en la línea, el botón "Completar etapa" se deshabilita hasta tildar todo, y aparece un aviso listando exactamente qué tareas faltan (se actualiza solo, sin importar el orden en que se tilden).</div>
 
     <h2>Al terminar</h2>
-    <p>Al completar la última fase, la OT pasa a <b>Terminado</b>. Si tiene cliente vinculado, aparece un botón manual "🚚 Generar pedido de instalación" — ya no es automático. Al generarlo, si quedaron materiales sobrantes, pregunta si querés devolverlos al stock.</p>
+    <p>Al completar la última fase, la OT pasa a <b>Terminado</b>. Si tiene cliente vinculado, aparece un botón manual "🚚 Generar pedido de instalación". Al generarlo, si quedaron materiales sobrantes, se pregunta si conviene devolverlos al stock.</p>
   </section>
 
   <!-- LINEAS DE PRODUCTO -->
   <section class="section" id="kit">
     <div class="section-header">
       <span class="section-icon">🏭</span>
-      <div><div class="section-title">Líneas de producto</div><div class="section-subtitle">El corazón de Fabricación y de Presupuestos <span class="badge badge-red">Nuevo en DEV</span></div></div>
+      <div><div class="section-title">Líneas de producto</div><div class="section-subtitle">El corazón de Fabricación y de Presupuestos</div></div>
     </div>
-    <p>Reemplaza lo que antes era un único "Kit de fabricación" global. Acá armás, para cada producto que fabriques o vendas, todo lo que antes estaba fijo en el código:</p>
+    <p>Cada línea de producto agrupa todo lo necesario para fabricar y presupuestar ese producto:</p>
     <ul>
       <li><b>📝 Descripción del producto</b> — texto libre; también aparece en el PDF del presupuesto, debajo del nombre de la línea.</li>
       <li><b>Checklist obligatorio</b> — toggle por línea: informativo (por defecto) u obligatorio para poder completar una fase.</li>
-      <li><b>📦 Kit de materiales</b> — igual que el viejo kit de fabricación, pero uno por línea, contra el catálogo real de <a href="#stock">Logística</a>.</li>
-      <li><b>🔧 Fases</b> — las que necesites, en el orden que quieras (reordenables con ▲▼), cada una con su propia lista de tareas numeradas (también reordenables).</li>
-      <li><b>⚙️ Configuración de presupuesto</b> — un modal aparte donde cargás los ítems que van a aparecer en la tabla de precios de <a href="#presupuestos">Presupuestos</a> para esta línea, agrupados en las secciones que quieras (Equipamiento, Mano de obra, etc.).</li>
+      <li><b>📦 Kit de materiales</b> — uno por línea, contra el catálogo real de <a href="#stock">Logística</a>.</li>
+      <li><b>🔧 Fases</b> — las que haga falta, en el orden que se necesite (reordenables con ▲▼), cada una con su propia lista de tareas numeradas (también reordenables).</li>
+      <li><b>⚙️ Configuración de presupuesto</b> — un modal aparte para cargar los ítems que van a aparecer en la tabla de precios de <a href="#presupuestos">Presupuestos</a> para esta línea, agrupados en las secciones que se necesiten (Equipamiento, Mano de obra, etc.).</li>
     </ul>
-    <p>Todo se edita en el momento — agregar, editar, reordenar o borrar una fase, tarea o ítem de presupuesto no afecta a las OT o presupuestos que ya estén en curso con la versión anterior.</p>
+    <p>Todo se edita en el momento — agregar, editar, reordenar o borrar una fase, tarea o ítem de presupuesto no afecta a las OT o presupuestos que ya estén en curso.</p>
     <div class="warning">⚠️ Al borrar una línea que tiene OTs o presupuestos creados, esos registros quedan con una línea inexistente y no se puede seguir operando sobre ellos desde ese punto. Se avisa antes de confirmar.</div>
   </section>
 
@@ -388,7 +392,7 @@
       <span class="section-icon">📋</span>
       <div><div class="section-title">Pedidos de instalación</div><div class="section-subtitle">De equipo terminado a sistema funcionando en el domicilio</div></div>
     </div>
-    <p>Un pedido de instalación (PI, numerado <code>PI-2026-0001</code>) se genera <b>manualmente</b> desde una OT Terminada con cliente vinculado (ver <a href="#fabricacion">Fabricación</a>). En esta versión DEV, el kit del pedido se arma únicamente con el <a href="#kit">kit de la línea de producto</a> de esa OT — no hay armado automático por sensores Zigbee relevados (eso era específico de Zpro y no existe más acá).</p>
+    <p>Un pedido de instalación (PI, numerado <code>PI-2026-0001</code>) se genera <b>manualmente</b> desde una OT Terminada con cliente vinculado (ver <a href="#fabricacion">Fabricación</a>). El kit del pedido se arma con el <a href="#kit">kit de la línea de producto</a> de esa OT.</p>
     <h2>Estados y flujo</h2>
     <p><b>Pendiente → En curso → Completado</b> (o Cancelado). Antes de salir a instalar, "Confirmar salida de stock" descuenta del inventario todo el kit del pedido (avisa si falta algo). Al marcar <b>Completado</b>: el cliente pasa a estado "Completada", se agrega automáticamente una entrada al <a href="#ficha">historial OTA</a> del cliente ("Instalación inicial"), se guarda el técnico como nota, y se pregunta si hay materiales sobrantes para devolver al stock.</p>
   </section>
@@ -399,7 +403,7 @@
       <span class="section-icon">🧰</span>
       <div><div class="section-title">Kit base de instalación</div><div class="section-subtitle">Materiales comunes a toda instalación, aparte de los sensores</div></div>
     </div>
-    <div class="warning">⚠️ En esta versión DEV, esta pantalla quedó <b>desconectada</b> del resto del flujo: el armado del pedido de instalación ahora usa solo el kit de la línea de producto (ver arriba), no este kit base. La pantalla sigue existiendo y se puede editar, pero no tiene ningún efecto todavía. Si en algún momento hace falta, se puede volver a conectar.</div>
+    <div class="note">📌 Esta pantalla existe de forma independiente al armado del pedido de instalación, que usa el kit de la línea de producto (ver <a href="#kit">Líneas de producto</a>). Sirve como referencia de materiales comunes que se pueden usar en cualquier instalación.</div>
   </section>
 
 
@@ -417,13 +421,13 @@
 
     <h2>Importar / exportar con la app móvil</h2>
     <p>"📥 Importar" (acá y en <a href="#backup">Backup</a>) toma un registro completado desde <code>riego-adaptativo-mantenimiento</code> (la app de campo) y lo adosa directo a la ficha del cliente correspondiente. "📤" exporta un registro en el sentido inverso, para pasarlo al móvil.</p>
-    <h2>Sincronización con Drive <span class="badge badge-green">Nuevo</span></h2>
-    <p>El circuito con la app móvil ahora es completamente automático, en los dos sentidos, vía una carpeta <code>RiegoAdaptativoMantenimiento</code> en Google Drive:</p>
+    <h2>Sincronización con Drive</h2>
+    <p>El circuito con la app móvil es completamente automático, en los dos sentidos, vía una carpeta <code>RiegoAdaptativoMantenimiento</code> en Google Drive:</p>
     <ul>
-      <li>Al tocar "📤" para exportar un registro pendiente, además de descargar el archivo local, se sube solo un <code>pendiente.json</code> a esa carpeta — la app móvil lo trae con su propio botón "☁️ Buscar pendiente en Drive", sin que se lo tengas que pasar a mano.</li>
+      <li>Al tocar "📤" para exportar un registro pendiente, además de descargar el archivo local, se sube solo un <code>pendiente.json</code> a esa carpeta — la app móvil lo trae con su propio botón "☁️ Buscar pendiente en Drive", sin tener que pasarlo a mano.</li>
       <li>Cuando el técnico termina la visita en el celular y toca "☁️ Subir a Drive", queda un <code>completado.json</code> en la misma carpeta. "☁️ Sincronizar desde Drive" (acá y en Backup) lo trae e importa con el mismo criterio de la importación manual (actualiza si el número de registro ya existía, si no lo agrega).</li>
     </ul>
-    <div class="note">📌 Usa la misma sesión de Google que ya tenés conectada para el <a href="#backup">backup de Riego Adaptativo</a> — no hace falta loguearse de nuevo.</div>
+    <div class="note">📌 Usa la misma sesión de Google que ya esté conectada para el <a href="#backup">backup de Riego Adaptativo</a> — no hace falta loguearse de nuevo.</div>
   </section>
 
   <!-- REPORTES -->
@@ -455,7 +459,7 @@
   <section class="section" id="versiones">
     <div class="section-header">
       <span class="section-icon">🔄</span>
-      <div><div class="section-title">Versiones SW</div><div class="section-subtitle">Catálogo global de releases del firmware Z-PRO</div></div>
+      <div><div class="section-title">Versiones SW</div><div class="section-subtitle">Catálogo global de releases del firmware AquaSeries</div></div>
     </div>
     <p>Es el historial de versiones de firmware disponibles (Mayor / Menor / Patch), con fecha y notas de cambios — no confundir con el <a href="#ficha">Historial OTA</a> de la ficha de cada cliente, que registra qué versión tiene instalada <b>ese</b> equipo puntual. Este catálogo sirve como referencia para saber qué versión ofrecer al actualizar un cliente.</p>
   </section>
@@ -476,23 +480,23 @@
       <div><div class="section-title">Backup / Restaurar</div><div class="section-subtitle">Snapshots automáticos, carpeta local, exportar/importar y niveles de borrado</div></div>
     </div>
 
-    <h2>Snapshots locales <span class="badge badge-green">Nuevo</span></h2>
+    <h2>Snapshots locales</h2>
     <p>La app guarda sola una copia de tus datos en este dispositivo (<code>localStorage</code>) en tres momentos: al cerrar la pestaña con la X, al minimizar o cambiar de ventana, y al tocar "🚪 Salir". Se conservan hasta 10 — si se llena, se borran primero los automáticos antes que los que guardaste a mano con "📸 Guardar snapshot ahora".</p>
     <p>"💾 Ver snapshots locales" (en Backup) lista todos con fecha y tipo (Automático / Manual), y permite restaurar uno o borrarlo. Restaurar guarda el estado actual como snapshot antes de pisarlo, así que no se pierde nada por accidente.</p>
     <div class="note">📌 Los snapshots viven en este navegador y este dispositivo — no reemplazan un backup exportado o en la carpeta local, que sí podés mover a otra PC.</div>
 
-    <h2>Carpeta local <span class="badge badge-green">Nuevo</span></h2>
+    <h2>Carpeta local</h2>
     <p>"📂 Elegir carpeta local" vincula una carpeta real de tu PC (por ejemplo, tu carpeta de OneDrive o Google Drive sincronizada). Una vez vinculada, cada vez que se guarda un cambio en cualquier parte de la app, se actualiza ahí un archivo <code>riego_backup_&lt;fecha&gt;.json</code> — sin que tengas que hacer nada. Se guardan los últimos 7 backups por fecha; los más viejos se borran solos.</p>
     <p>La vinculación se recuerda entre sesiones. Al reabrir la app intenta reconectar la carpeta en silencio; si el navegador venció el permiso, aparece un banner abajo a la izquierda pidiendo un clic para reautorizar — el navegador exige ese gesto explícito, no se puede renovar solo.</p>
     <div class="note">📌 Requiere un navegador con soporte de File System Access (Chrome o Brave). En otros navegadores, el botón avisa que no está disponible y no rompe nada más.</div>
 
-    <h2>Google Drive <span class="badge badge-green">Nuevo</span></h2>
+    <h2>Google Drive</h2>
     <p>"☁️ Subir backup a Drive" conecta tu cuenta de Google (una sola vez) y crea una carpeta visible <code>RiegoAdaptativo</code> en tu Drive. A partir de ahí, cada vez que se guarda un cambio en la app, un archivo <code>backup_autosync.json</code> se actualiza solo en segundo plano (con una espera de 30 segundos de calma para no sincronizar en cada tecla) — es sincronización real, no compartir un archivo.</p>
     <p>El mismo botón también sirve para forzar una subida inmediata con fecha y hora (<code>backup_riego_&lt;fecha&gt;.json</code>), como punto de restauración aparte del autosync. "📂 Restaurar backup de Drive" lista todos los backups de esa carpeta — autosync y manuales — para elegir cuál traer de vuelta.</p>
     <p>El estado de la conexión se ve en Backup: ✅ sincronizado, ⏳ pendiente, ☁️ sincronizando, ⚠️ error, o ➖ sin conectar. Al reabrir la app, si la sesión de Google seguía vigente, se reconecta sola sin pedir nada.</p>
     <div class="note">📌 "🚪 Salir" y minimizar/cambiar de pestaña también disparan una sincronización a Drive si hay cambios pendientes, además del snapshot local y la carpeta local.</div>
 
-    <h2>Botón "🚪 Salir" <span class="badge badge-green">Nuevo</span></h2>
+    <h2>Botón "🚪 Salir"</h2>
     <p>En la barra superior. Fuerza un snapshot local manual y, si hay carpeta local o Drive conectados, actualiza también esos backups — todo antes de cerrar la ventana. Muestra un resumen de qué se guardó bien y qué no.</p>
 
     <h2>Exportar / importar</h2>
