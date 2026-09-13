@@ -30,6 +30,31 @@ function toggleNav(el){
 </head>
 <body>
 
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+<div id="splash-screen" onclick="cerrarSplash()" style="position:fixed;inset:0;z-index:99999;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;text-align:center;padding:20px">
+  <img src="logo.png" alt="AquaSeries" style="width:min(420px,80vw);height:auto;margin-bottom:18px">
+  <div id="splash-footer" style="font-family:monospace;font-size:12px;color:#666;letter-spacing:.02em"></div>
+  <div style="font-family:'Dancing Script',cursive;font-size:20px;color:#256282;margin-top:14px">Development by Guille</div>
+  <div style="font-size:11px;color:#999;margin-top:22px">Tocá en cualquier lado o presioná Enter para continuar</div>
+</div>
+<script>
+(function(){
+  var el = document.getElementById('splash-footer');
+  var now = new Date();
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  var fecha = pad(now.getDate())+'/'+pad(now.getMonth()+1)+'/'+now.getFullYear();
+  var hora = pad(now.getHours())+':'+pad(now.getMinutes());
+  if(el) el.textContent = 'Riego Adaptativo · '+fecha+' · '+hora+' · v1.4';
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Enter') cerrarSplash();
+  });
+})();
+function cerrarSplash(){
+  var s = document.getElementById('splash-screen');
+  if(s) s.remove();
+}
+</script>
+
 <div style="background:#7B4F00;color:#fff;text-align:center;padding:6px 12px;font-size:12px;font-weight:700;letter-spacing:.4px">
   🧪 ENTORNO DE DESARROLLO — datos aislados de producción, no usar para clientes reales
 </div>
