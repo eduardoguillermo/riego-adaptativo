@@ -262,9 +262,9 @@
   <section class="section" id="clientes">
     <div class="section-header">
       <span class="section-icon">🔍</span>
-      <div><div class="section-title">Listado y alta de clientes</div><div class="section-subtitle">El registro central de instalaciones Zpro</div></div>
+      <div><div class="section-title">Listado y alta de clientes</div><div class="section-subtitle">El registro central de instalaciones AquaSeries</div></div>
     </div>
-    <p>El listado se filtra por texto (nombre, lote o barrio), modelo Zpro (Base / Energy / Comfort / Black) y estado (Activo / Baja). Un cliente dado de baja no se borra — queda marcado y se puede reactivar en cualquier momento.</p>
+    <p>El listado se filtra por texto (nombre, lote o barrio), modelo AquaSeries (AquaOne / AquaDuo / AquaTrio / AquaPro / AquaMax) y estado (Activo / Baja). Un cliente dado de baja no se borra — queda marcado y se puede reactivar en cualquier momento.</p>
     <h2>Alta manual</h2>
     <p>Datos obligatorios: nombre, lote, teléfono. El resto (barrio, modelo, versión instalada, fecha de instalación, MAC del ESP32, PIN OTA, Chat ID de Telegram, email, cantidad de ambientes) se puede completar después desde la ficha. Un alta manual es independiente del circuito de presupuesto → conversión — sirve para cargar clientes ya instalados o históricos.</p>
     <h2>Dar de baja vs. Eliminar</h2>
@@ -279,7 +279,7 @@
     </div>
     <p>Al abrir un cliente del listado, la ficha se organiza en pestañas:</p>
     <ul>
-      <li><b>📋 Datos Zpro</b> — datos del cliente y del equipo instalado (modelo, versión, MAC, PIN OTA, Chat ID).</li>
+      <li><b>📋 Datos del cliente</b> — datos del cliente y del equipo instalado (modelo, versión, MAC, PIN OTA, Chat ID).</li>
       <li><b>🔧 Equipamiento</b> — el equipamiento provisto en la instalación.</li>
       <li><b>📡 Instalación Zigbee</b> — cada sensor Zigbee instalado, con su tipo (los tipos salen de <a href="#tipos">Tipos de sensor</a>).</li>
       <li><b>🔄 Historial OTA</b> — cada actualización de firmware aplicada a ese equipo puntual, con resultado (Exitoso / Fallido / Parcial) y método (OTA / Serial / Manual). No confundir con <a href="#versiones">Versiones SW</a>, que es el catálogo global de releases disponibles.</li>
