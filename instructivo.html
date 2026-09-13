@@ -225,7 +225,7 @@
     <h2>Importar relevamiento</h2>
     <p>"📥 Importar relevamiento" lee el archivo JSON que exporta la app móvil (<code>riego-adaptativo-relevamiento</code>). Cada relevamiento entra como presupuesto en estado Borrador; si el mismo relevamiento ya se había importado antes, no se duplica.</p>
     <p>"☁️ Sincronizar desde Drive" hace lo mismo sin ningún archivo de por medio: la app móvil sube directo a Google Drive los relevamientos que marcás como Aprobados ahí, y este botón los trae — mismo criterio de duplicados que la importación manual.</p>
-    <div class="note">📌 Los relevamientos importados no traen línea de producto asignada todavía (eso es específico de Zpro/Zigbee, que la app móvil de relevamiento no conoce) — hay que elegirla a mano en el presupuesto una vez importado.</div>
+    <div class="note">📌 Los relevamientos importados no traen línea de producto asignada todavía — la app móvil de relevamiento no sabe de líneas de producto, solo relevanta datos del terreno — hay que elegirla a mano en el presupuesto una vez importado.</div>
 
     <h2>PDF y envío por email</h2>
     <p>"📄 PDF" abre el presupuesto en una pestaña nueva, lista para "🖨️ Imprimir / Guardar PDF". "📧 Email" abre Gmail con destinatario, asunto y cuerpo ya completados — pero <b>no adjunta el PDF</b>, eso ningún sitio lo puede hacer por vos por seguridad del navegador. El flujo correcto es: generar y guardar el PDF primero, después usar "Email" y adjuntarlo a mano (📎) antes de enviar. El botón te lo recuerda con un aviso cada vez que lo tocás.</p>
@@ -281,7 +281,7 @@
     <ul>
       <li><b>📋 Datos del cliente</b> — datos del cliente y del equipo instalado (modelo, versión, MAC, PIN OTA, Chat ID).</li>
       <li><b>🔧 Equipamiento</b> — el equipamiento provisto en la instalación.</li>
-      <li><b>📡 Instalación Zigbee</b> — cada sensor Zigbee instalado, con su tipo (los tipos salen de <a href="#tipos">Tipos de sensor</a>).</li>
+      <li><b>💧 Sensores de riego</b> — cada sensor instalado, con su tipo (los tipos salen de <a href="#tipos">Tipos de sensor</a>).</li>
       <li><b>🔄 Historial OTA</b> — cada actualización de firmware aplicada a ese equipo puntual, con resultado (Exitoso / Fallido / Parcial) y método (OTA / Serial / Manual). No confundir con <a href="#versiones">Versiones SW</a>, que es el catálogo global de releases disponibles.</li>
       <li><b>🛠️ Mantenimiento</b> — accesos directos para registrar o ver visitas de este cliente (el detalle completo vive en el módulo <a href="#mantenimientos">Mantenimiento</a>).</li>
       <li><b>📄 Acta</b> — la <a href="#actas">acta de conformidad</a> de este cliente.</li>
@@ -463,10 +463,10 @@
   <!-- TIPOS SENSOR -->
   <section class="section" id="tipos">
     <div class="section-header">
-      <span class="section-icon">📡</span>
-      <div><div class="section-title">Tipos de sensor</div><div class="section-subtitle">La lista de tipos Zigbee disponibles al cargar un dispositivo</div></div>
+      <span class="section-icon">💧</span>
+      <div><div class="section-title">Tipos de sensor</div><div class="section-subtitle">La lista de tipos de sensor de riego disponibles al cargar un dispositivo</div></div>
     </div>
-    <p>Lista simple y editable (Puerta, Ventana, Movimiento PIR, Botón, Humo, Vibración, y los que agregues) que alimenta el desplegable de tipo en la pestaña <a href="#ficha">Instalación Zigbee</a> de cada cliente.</p>
+    <p>Lista simple y editable (Sensor de humedad Mi Flora, Sensor de nivel de reservorio, Sensor de temperatura DS18B20, Actuador de válvula, Sensor de caudal, Estación meteorológica, y los que agregues) que alimenta el desplegable de tipo en la pestaña <a href="#ficha">Sensores de riego</a> de cada cliente.</p>
   </section>
 
   <!-- BACKUP -->
