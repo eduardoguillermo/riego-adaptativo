@@ -129,7 +129,7 @@
 
 <div class="layout">
 <nav class="sidebar">
-  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v1.6</p></div></div>
+  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v1.7</p></div></div>
 
   <div class="section-label">Introducción</div>
   <a href="#intro">🏠 ¿Qué es esta app?</a>
@@ -181,7 +181,7 @@
     <h1>💧 Riego Adaptativo</h1>
     <p>Manual del sistema administrativo — ciclo completo del negocio, de presupuesto a mantenimiento</p>
     <div class="hero-badges">
-      <span class="badge badge-red">✓ v1.6</span>
+      <span class="badge badge-red">✓ v1.7</span>
       <span class="badge badge-blue">✓ Sin servidor</span>
       <span class="badge badge-amber">✓ Datos locales</span>
     </div>
@@ -520,6 +520,16 @@
 
     <details class="changelog-details" open>
       <summary class="changelog-summary">Ver historial de versiones</summary>
+
+      <div class="changelog-entry">
+        <div class="changelog-version"><span class="v-num">v1.7</span><span class="changelog-tag tag-feature">feature</span></div>
+        <ul class="changelog-list">
+          <li><b>Cliente Potencial</b>: nuevo botón "➕ Cliente potencial" junto al desplegable de cliente existente en Presupuestos. Crea un registro con datos básicos (nombre, teléfono, email, dirección, barrio) y estado <b>Potencial</b> — sin modelo ni datos de instalación. Mientras es potencial, sus pestañas de Equipamiento, Sensores de riego, Mantenimiento y Acta quedan bloqueadas con un aviso.</li>
+          <li>Si el presupuesto vinculado se aprueba, "👤 Cliente Activo" completa los datos que faltan (lote, MAC, PIN, versión) sobre el <b>mismo registro</b> y lo pasa a Activo — no se duplica. Si el presupuesto no se aprueba, el potencial queda disponible para otro presupuesto futuro o para armar una lista de correo.</li>
+          <li>Nuevo contador "Potenciales" en el dashboard de Clientes, y "Potencial" como opción del filtro de estado.</li>
+          <li>Corregido: el botón "✅ Activar" del listado de Clientes (pensado para reactivar una Baja) aparecía también para potenciales y los activaba directo, sin pasar por la aprobación del presupuesto ni completar los datos de instalación. Ahora un potencial solo puede descartarse desde ahí — activarlo pasa siempre por el presupuesto.</li>
+        </ul>
+      </div>
 
       <div class="changelog-entry">
         <div class="changelog-version"><span class="v-num">v1.6</span><span class="changelog-tag tag-fix">fix</span></div>
