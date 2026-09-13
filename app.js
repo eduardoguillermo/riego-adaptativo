@@ -301,18 +301,24 @@ function borrarCliente(id){
   var nMant=(DB.mantenimientos||[]).filter(function(m){return m.clienteId===id;}).length;
   var nFondos=(DB.fondos||[]).filter(function(f){return f.vinculo==='cli:'+id;}).length;
   var nGest=(DB.gestiones||[]).filter(function(g){return g.clienteNombre===c.nombre;}).length;
+  var presVinculados=(DB.presupuestos||[]).filter(function(p){return p.clienteId===id||p.clientePotencialId===id;});
   var huerfanos=[];
   if(nOT) huerfanos.push(nOT+' orden(es) de trabajo');
   if(nPI) huerfanos.push(nPI+' pedido(s) de instalación');
   if(nMant) huerfanos.push(nMant+' registro(s) de mantenimiento');
   if(nFondos) huerfanos.push(nFondos+' movimiento(s) de fondos');
   if(nGest) huerfanos.push(nGest+' gestión(es) económica(s)');
+  if(presVinculados.length) huerfanos.push(presVinculados.length+' presupuesto(s) vinculado(s) — van a quedar sin cliente asignado, pero el presupuesto en sí no se borra');
   var msg='¿Eliminar permanentemente al cliente "'+c.nombre+'"? Esta acción no se puede deshacer.';
   if(huerfanos.length){
     msg+='\n\n⚠️ Este cliente tiene registros relacionados que NO se van a borrar ni actualizar — van a quedar sin vínculo al cliente real:\n• '+huerfanos.join('\n• ')+'\n\nSi preferís conservar el historial, usá "Dar de baja" en lugar de eliminar.';
   }
   if(!confirm(msg)) return;
   if(!confirm('Última confirmación. ¿Eliminar "'+c.nombre+'"?')) return;
+  presVinculados.forEach(function(p){
+    if(p.clienteId===id) p.clienteId=null;
+    if(p.clientePotencialId===id) p.clientePotencialId=null;
+  });
   DB.clientes=DB.clientes.filter(function(x){return x.id!==id;});
   save(); renderStats(); renderClientes(); goTo('clientes');
 }
