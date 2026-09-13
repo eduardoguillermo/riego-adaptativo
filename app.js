@@ -8,7 +8,7 @@ function defData(){
     nid:1,
     clientes:[],
     versiones:[],
-    tipos:['Puerta','Ventana','Movimiento PIR','Botón','Humo','Vibración','Agua','Temperatura'],
+    tipos:['Sensor de humedad (Mi Flora)','Sensor de nivel de reservorio','Sensor de temperatura (DS18B20)','Actuador de válvula','Sensor de caudal','Estación meteorológica'],
     presupuestos:[],
     componentes:[],
     movimientos:[],
@@ -34,10 +34,11 @@ function defData(){
       pdf_incluir_monto:true,
       pdf_incluir_sensores:true,
       pdf_incluir_condiciones:true,
-      desc_Base:'Sistema de seguridad basico con control remoto via Telegram. Notificaciones en tiempo real y activacion remota.',
-      desc_Energy:'Sistema con gestion energetica integrada, monitoreo de corte de suministro, bateria de respaldo y sirena exterior.',
-      desc_Comfort:'Sistema avanzado con automatizacion, integracion Zigbee completa, control de cargas y notificaciones inteligentes.',
-      desc_Black:'Sistema de maxima prestacion con multiples usuarios, historial extendido, integracion de camaras y soporte prioritario.',
+      desc_AquaOne:'Sistema de riego automático básico con control remoto vía Telegram. Riego programado por horario y notificaciones en tiempo real.',
+      desc_AquaDuo:'Suma sensor de humedad de suelo (Mi Flora) para ajustar el riego según la condición real de la tierra, no solo por horario.',
+      desc_AquaTrio:'Suma protección antihelada: monitoreo de temperatura ambiente y activación preventiva ante riesgo de helada de irradiación.',
+      desc_AquaPro:'Suma sensor de nivel de reservorio y lógica adaptativa completa: cruza humedad, temperatura y pronóstico para decidir cuándo regar.',
+      desc_AquaMax:'Máxima prestación: múltiples zonas de riego independientes, historial extendido de ciclos y soporte prioritario.',
       motivosSalida:['Merma / descarte','Uso interno / prototipo','Garantía cliente','Reposición a cliente','Prueba de calidad','Devolución a proveedor','Rotura / daño'],
       origenesEntrada:['Compra','Devolución','Otro']
     }
@@ -210,7 +211,7 @@ function gc(){ return DB.clientes.find(x=>x.id===curCid); }
 function ini(n){ return n.split(/[,\s]+/).filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
 const AVC=['background:#E3F2FD;color:#0D47A1','background:#E8F5E9;color:#1B5E20','background:#FFF8E1;color:#7B4F00','background:#FCE4EC;color:#880E4F','background:#E8EAF6;color:#283593','background:#E0F2F1;color:#004D40'];
 function avC(n){ let h=0; for(let c of n) h=(h+c.charCodeAt(0))%AVC.length; return AVC[h]; }
-function mPill(m){ const mp={Base:'p-x',Energy:'p-a',Comfort:'p-b',Black:'p-r'}; return `<span class="pill ${mp[m]||'p-x'}">${m}</span>`; }
+function mPill(m){ const mp={AquaOne:'p-x',AquaDuo:'p-a',AquaTrio:'p-b',AquaPro:'p-g',AquaMax:'p-r'}; return `<span class="pill ${mp[m]||'p-x'}">${m}</span>`; }
 function ePill(e){ return `<span class="pill ${e==='Activo'?'p-g':'p-r'}">${e}</span>`; }
 function tPill(t){ const tp={Puerta:'p-b',Ventana:'p-x','Movimiento PIR':'p-a',Botón:'p-g',Humo:'p-r',Vibración:'p-p'}; return `<span class="pill ${tp[t]||'p-x'}">${t}</span>`; }
 function metPill(m){ const mp={OTA:'p-b',Serial:'p-a',Manual:'p-x'}; return `<span class="pill ${mp[m]||'p-x'}">${m}</span>`; }
@@ -234,17 +235,19 @@ function renderStats(){
   const c=DB.clientes;
   const act=c.filter(x=>x.estado==='Activo').length;
   const baj=c.filter(x=>x.estado==='Baja').length;
-  const base=c.filter(x=>x.estado==='Activo'&&x.modelo==='Base').length;
-  const energy=c.filter(x=>x.estado==='Activo'&&x.modelo==='Energy').length;
-  const comfort=c.filter(x=>x.estado==='Activo'&&x.modelo==='Comfort').length;
-  const black=c.filter(x=>x.estado==='Activo'&&x.modelo==='Black').length;
+  const one=c.filter(x=>x.estado==='Activo'&&x.modelo==='AquaOne').length;
+  const duo=c.filter(x=>x.estado==='Activo'&&x.modelo==='AquaDuo').length;
+  const trio=c.filter(x=>x.estado==='Activo'&&x.modelo==='AquaTrio').length;
+  const pro=c.filter(x=>x.estado==='Activo'&&x.modelo==='AquaPro').length;
+  const max=c.filter(x=>x.estado==='Activo'&&x.modelo==='AquaMax').length;
   document.getElementById('stats-box').innerHTML=`
     <div class="stat"><div class="stat-n green">${act}</div><div class="stat-l">Activos</div></div>
     <div class="stat"><div class="stat-n red">${baj}</div><div class="stat-l">Bajas</div></div>
-    <div class="stat"><div class="stat-n">${base}</div><div class="stat-l">Base</div></div>
-    <div class="stat"><div class="stat-n amber">${energy}</div><div class="stat-l">Energy</div></div>
-    <div class="stat"><div class="stat-n blue">${comfort}</div><div class="stat-l">Comfort</div></div>
-    <div class="stat"><div class="stat-n red">${black}</div><div class="stat-l">Black</div></div>`;
+    <div class="stat"><div class="stat-n">${one}</div><div class="stat-l">AquaOne</div></div>
+    <div class="stat"><div class="stat-n amber">${duo}</div><div class="stat-l">AquaDuo</div></div>
+    <div class="stat"><div class="stat-n blue">${trio}</div><div class="stat-l">AquaTrio</div></div>
+    <div class="stat"><div class="stat-n green">${pro}</div><div class="stat-l">AquaPro</div></div>
+    <div class="stat"><div class="stat-n red">${max}</div><div class="stat-l">AquaMax</div></div>`;
 }
 
 // =======================================================
@@ -449,7 +452,7 @@ function renderDatos(){
     <div class="fgrid">${fbox('Nombre',c.nombre)}${fbox('Lote',c.lote)}${fbox('Barrio',c.barrio)}</div>
     <div class="fgrid">${fbox('Teléfono',c.tel)}${fbox('Email',c.email||'—')}${fbox('Ambientes',c.ambientes?c.ambientes+' amb':'—')}</div>\n    <div class=\"fgrid\">${fbox('Estado',ePill(c.estado))}<div></div><div></div></div>
     <hr class="div">
-    <div class="fgrid">${fbox('Modelo Zpro',mPill(c.modelo))}${fbox('Versión instalada',c.version,true)}${fbox('Fecha instalación',c.fecha)}</div>
+    <div class="fgrid">${fbox('Modelo AquaSeries',mPill(c.modelo))}${fbox('Versión instalada',c.version,true)}${fbox('Fecha instalación',c.fecha)}</div>
     <hr class="div">
     <div class="fgrid">${fbox('MAC del ESP32',c.mac,true)}${fbox('PIN OTA',c.pin?'••••••':'')}${fbox('Chat ID Telegram',c.chatid,true)}</div>
     <hr class="div">
@@ -474,7 +477,7 @@ function editarDatos(){
       <div class="fg"><label>Lote *</label><input id="ed-l" value="${c.lote}"></div>
       <div class="fg"><label>Barrio</label><input id="ed-ba" value="${c.barrio||''}"></div>
       <div class="fg"><label>Teléfono *</label><input id="ed-t" value="${c.tel}"></div>
-      <div class="fg"><label>Modelo Zpro</label><select id="ed-m">${['Base','Energy','Comfort','Black'].map(m=>`<option${c.modelo===m?' selected':''}>${m}</option>`).join('')}</select></div>
+      <div class="fg"><label>Modelo AquaSeries</label><select id="ed-m">${['AquaOne','AquaDuo','AquaTrio','AquaPro','AquaMax'].map(m=>`<option${c.modelo===m?' selected':''}>${m}</option>`).join('')}</select></div>
       <div class="fg"><label>Versión instalada</label><input id="ed-v" value="${c.version||''}"></div>
       <div class="fg"><label>Fecha instalación</label><input id="ed-f" type="date" value="${c.fecha||''}"></div>
       <div class="fg"><label>MAC del ESP32</label><input id="ed-mac" value="${c.mac||''}" style="font-family:monospace"></div>
@@ -509,7 +512,7 @@ function renderEquipo(){
     <hr class="div">
     <div class="twocol">
       <div>
-        <div class="sectitle">UPS</div>
+        <div class="sectitle">Actuador de válvula</div>
         <div class="fgrid2">
           ${fbox('Marca',e.ups_marca||'—')}${fbox('Modelo',e.ups_modelo||'—')}
           ${fbox('Tensión de salida',e.ups_tension||'—')}${fbox('Garantía',garPill(e.ups_garantia))}
@@ -517,7 +520,7 @@ function renderEquipo(){
         </div>
       </div>
       <div>
-        <div class="sectitle">Sirena</div>
+        <div class="sectitle">Sensor de humedad (Mi Flora)</div>
         <div class="fgrid2">
           ${fbox('Marca',e.sirena_marca)}${fbox('Modelo',e.sirena_modelo)}
           ${fbox('N° de serie',e.sirena_serie,true)}
@@ -562,14 +565,14 @@ function editarEquipo(){
       <div class="fg"><label>N° serie</label><input id="eq-es" value="${e.esp_serie||''}"></div>
       <div class="fg"><label>Proveedor</label><input id="eq-pr" value="${e.proveedor||''}"></div>
       <div class="fg"><label>Fecha compra</label><input id="eq-fc" type="date" value="${e.fcompra||''}"></div>
-      <div class="fsec">UPS</div>
+      <div class="fsec">Actuador de válvula</div>
       <div class="fg"><label>Marca</label><input id="eq-ups-m" value="${e.ups_marca||''}"></div>
       <div class="fg"><label>Modelo</label><input id="eq-ups-mo" value="${e.ups_modelo||''}"></div>
       <div class="fg"><label>Tensión de salida</label><input id="eq-ups-t" value="${e.ups_tension||''}" placeholder="Ej: 12V DC"></div>
       <div class="fg"><label>Garantía</label><select id="eq-ups-g"><option${(e.ups_garantia||'No')==='Sí'?' selected':''}>Sí</option><option${(e.ups_garantia||'No')!=='Sí'?' selected':''}>No</option></select></div>
       <div class="fg"><label>Vencimiento garantía</label><input id="eq-ups-gv" type="date" value="${e.ups_gar_vence||''}"></div>
       <div class="fg"><label>Último service</label><input id="eq-ups-us" type="date" value="${e.ups_ultimo_service||''}"></div>
-      <div class="fsec">Sirena</div>
+      <div class="fsec">Sensor de humedad (Mi Flora)</div>
       <div class="fg"><label>Marca</label><input id="eq-sm" value="${e.sirena_marca||''}"></div>
       <div class="fg"><label>Modelo</label><input id="eq-smo" value="${e.sirena_modelo||''}"></div>
       <div class="fg"><label>N° serie</label><input id="eq-ss" value="${e.sirena_serie||''}"></div>
@@ -595,10 +598,10 @@ function editarEquipo(){
 // =======================================================
 function renderZigbee(){
   const c=gc();
-  if(!c.zigbee.length){document.getElementById('cont-zigbee').innerHTML='<div class="empty">📡 Sin dispositivos registrados. Usá "Agregar dispositivo" para registrar el primero.</div>';return;}
+  if(!c.zigbee.length){document.getElementById('cont-zigbee').innerHTML='<div class="empty">📡 Sin sensores registrados. Usá "Agregar sensor" para registrar el primero.</div>';return;}
   document.getElementById('cont-zigbee').innerHTML=`<table>
     <colgroup><col style="width:8%"><col style="width:11%"><col style="width:9%"><col style="width:9%"><col style="width:12%"><col style="width:11%"><col style="width:10%"><col style="width:10%"><col style="width:11%"><col style="width:9%"></colgroup>
-    <thead><tr><th>Tipo</th><th>Nombre</th><th>Marca</th><th>Modelo</th><th>Dir. hex</th><th>Ubicación</th><th>Marca pilas</th><th>Modelo pilas</th><th>Cambio pilas</th><th></th></tr></thead>
+    <thead><tr><th>Tipo</th><th>Nombre</th><th>Marca</th><th>Modelo</th><th>ID / dirección</th><th>Ubicación</th><th>Marca pilas</th><th>Modelo pilas</th><th>Cambio pilas</th><th></th></tr></thead>
     <tbody>${c.zigbee.map((d,i)=>`<tr>
       <td>${tPill(d.tipo)}</td><td>${d.nombre}</td><td>${d.marca||'—'}</td><td>${d.modelo||'—'}</td>
       <td class="mono">${d.hex||'—'}</td><td>${d.ubicacion||'—'}</td>
@@ -614,13 +617,13 @@ function modalZigbee(idx=-1){
   const c=gc();
   const d=idx>=0?c.zigbee[idx]:{};
   const tipos=[...DB.tipos].sort((a,b)=>(a||'').localeCompare(b||'')).map(t=>`<option${(d.tipo||'')==t?' selected':''}>${t}</option>`).join('');
-  openModal(idx>=0?'Editar dispositivo Zigbee':'Agregar dispositivo Zigbee',`
+  openModal(idx>=0?'Editar sensor de riego':'Agregar sensor de riego',`
     <div class="fg3">
       <div class="fg"><label>Tipo *</label><select id="z-t">${tipos}</select></div>
       <div class="fg"><label>Nombre *</label><input id="z-n" value="${d.nombre||''}" placeholder="Ej: Entrada principal"></div>
       <div class="fg"><label>Marca</label><input id="z-ma" value="${d.marca||''}" placeholder="Aqara, Sonoff, Tuya..."></div>
       <div class="fg"><label>Modelo</label><input id="z-mo" value="${d.modelo||''}" placeholder="MCCGQ11LM" list="dl-z-mo">${stockDatalist("z-mo","")}</div>
-      <div class="fg"><label>Dirección hex</label><input id="z-h" value="${d.hex||''}" placeholder="0x00158D0001A2B3C4" style="font-family:monospace"></div>
+      <div class="fg"><label>ID / dirección del dispositivo</label><input id="z-h" value="${d.hex||''}" placeholder="Ej: MAC o ID interno" style="font-family:monospace"></div>
       <div class="fg"><label>Ubicación física</label><input id="z-u" value="${d.ubicacion||''}" placeholder="Ej: Frente, puerta madera"></div>
       <div class="fg"><label>Marca de pilas</label><input id="z-mp" value="${d.marcaPilas||''}" placeholder="Ej: Energizer"></div>
       <div class="fg"><label>Modelo de pilas</label><input id="z-mop" value="${d.modeloPilas||''}" placeholder="Ej: AA 1.5V"></div>
@@ -637,7 +640,7 @@ function modalZigbee(idx=-1){
     save();renderZigbee();return true;
   });
 }
-function elimZigbee(i){if(!confirm('¿Eliminar este dispositivo?'))return;gc().zigbee.splice(i,1);save();renderZigbee();}
+function elimZigbee(i){if(!confirm('¿Eliminar este sensor?'))return;gc().zigbee.splice(i,1);save();renderZigbee();}
 
 // =======================================================
 // SUB: OTA
@@ -736,11 +739,11 @@ function modalMant(idx){
       <div class="fg"><label>Fecha *</label><input id="mt-f" type="date" value="${m.fecha||today()}"></div>
       <div class="fg"><label>Técnico</label><input id="mt-te" value="${m.tecnico||''}" placeholder="Nombre del técnico"></div>
       <div class="fg"><label>Tipo *</label><select id="mt-ti">${tipoOpts.map(t=>`<option${(m.tipo||'')==t?' selected':''}>${t}</option>`).join('')}</select></div>
-      <div class="fg"><label>N° Serie sistema</label><input id="mt-ns" value="${m.nserie||c.mac||''}" placeholder="VSS-K2605-02-001"></div>
+      <div class="fg"><label>N° Serie sistema</label><input id="mt-ns" value="${m.nserie||c.mac||''}" placeholder="AQ-2026-001"></div>
       <div class="fg"><label>Garantía válida hasta</label><input id="mt-gv" type="date" value="${m.garantiaVence||c.actaGarantiaVence||''}"></div>
-      <div class="fg full"><label>Motivo del llamado *</label><input id="mt-mo" value="${m.motivo||''}" placeholder="Ej: Sirena no activa, falsa alarma..." list="dl-mt-mo">${getMantDatalist('motivo','dl-mt-mo')}</div>
+      <div class="fg full"><label>Motivo del llamado *</label><input id="mt-mo" value="${m.motivo||''}" placeholder="Ej: Válvula no cierra, sensor sin señal..." list="dl-mt-mo">${getMantDatalist('motivo','dl-mt-mo')}</div>
       <div class="fg full"><label>Falla detectada</label><input id="mt-fa" value="${m.falla||''}" placeholder="Ej: Conexión suelta, sensor desincronizado" list="dl-mt-fa">${getMantDatalist('falla','dl-mt-fa')}</div>
-      <div class="fg full"><label>Reparación realizada</label><input id="mt-re" value="${m.reparacion||''}" placeholder="Ej: Reconexión terminal, re-vinculación Zigbee" list="dl-mt-re">${getMantDatalist('reparacion','dl-mt-re')}</div>
+      <div class="fg full"><label>Reparación realizada</label><input id="mt-re" value="${m.reparacion||''}" placeholder="Ej: Reconexión terminal, recalibración de sensor" list="dl-mt-re">${getMantDatalist('reparacion','dl-mt-re')}</div>
       <div class="fg full"><label>Material utilizado (del stock)</label><div id="mt-mat-list" style="margin-bottom:6px">${(m.materiales||[]).map((mat,i)=>'<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px"><span style="font-size:11px;flex:1">'+mat.desc+' x'+mat.cant+'</span><button type="button" onclick="quitarMatMant('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer">🗑️</button></div>').join('')}</div><button type="button" class="btn btn-sm" onclick="agregarMatMant()">➕ Agregar material</button></div>
       <div class="fg full"><label>Material a facturar</label><input id="mt-mf" value="${m.matFacturar||''}" placeholder="Describir material a facturar al cliente"></div>
       <div class="fg"><label>En garantía</label><select id="mt-g"><option${(m.garantia||'No')==='No'?' selected':''}>No</option><option${(m.garantia||'')==='Sí'?' selected':''}>Sí</option></select></div>
@@ -1476,7 +1479,7 @@ function renderBackupInfo(){
   const snaps=vssCargarSnapshots().length;
   document.getElementById('backup-info').innerHTML=`
     ${fbox('Clientes totales',c.length)}
-    ${fbox('Dispositivos Zigbee',devs)}
+    ${fbox('Sensores de riego',devs)}
     ${fbox('Actualizaciones OTA',otas)}
     ${fbox('Visitas de mantenimiento',mantos)}
     ${fbox('Versiones SW',DB.versiones.length)}
@@ -1681,7 +1684,7 @@ function convertirCliente(id){
     f('apin', '');
     f('achat', '');
     var am=document.getElementById('am');
-    if(am) am.value=d.modelo||'Base';
+    if(am) am.value=d.modelo||'AquaOne';
     // Store sensors and presId for guardarCliente to use
     window._convSensores = d.sensores||{};
     window._convPresId = d.id;
@@ -3154,10 +3157,11 @@ function renderConfig(){
   h += '<div style="font-size:12px;color:var(--text2)">Numeración actual: OC #'+DB.ordenes.length+' · Presupuestos: '+DB.presupuestos.length+' · ID interno: '+DB.nid+'</div>';
   h += '<button class="btn btn-d" onclick="resetearContadores()" style="font-size:12px">🔄 Reiniciar contadores</button>';
   h += '</div>';
-  h += cfgTxt('Zpro Base','cfg-desc-Base', cfg.desc_Base||'Activación y desactivación del sistema desde el celular, en cualquier momento y desde cualquier lugar. Notificaciones instantáneas ante cualquier evento de seguridad — apertura de puertas, ventanas o activación de sensores. Monitoreo del estado del sistema en tiempo real desde Telegram. Historial de eventos registrados con fecha y hora. Control mediante menú interactivo en Telegram — sin necesidad de aplicaciones adicionales. Compatible con sensores de puerta, ventana y botón de pánico. Sirena exterior de larga durabilidad y alta potencia sonora.');
-  h += cfgTxt('Zpro Energy','cfg-desc-Energy', cfg.desc_Energy||'Activación y desactivación del sistema desde el celular, en cualquier momento y desde cualquier lugar. Notificaciones instantáneas ante cualquier evento de seguridad — apertura de puertas, ventanas o activación de sensores. Monitoreo del estado del sistema en tiempo real desde Telegram. Historial de eventos registrados con fecha y hora. Control mediante menú interactivo en Telegram — sin necesidad de aplicaciones adicionales. Compatible con sensores de puerta, ventana y botón de pánico. Sirena exterior de larga durabilidad y alta potencia sonora. Detección y notificación inmediata ante cortes de energía eléctrica. Batería de respaldo que mantiene el sistema activo sin suministro eléctrico. Monitoreo del nivel de carga de la batería con alertas cuando requiere atención.');
-  h += cfgTxt('Zpro Comfort','cfg-desc-Comfort', cfg.desc_Comfort||'Activación y desactivación del sistema desde el celular, en cualquier momento y desde cualquier lugar. Notificaciones instantáneas ante cualquier evento de seguridad — apertura de puertas, ventanas o activación de sensores. Monitoreo del estado del sistema en tiempo real desde Telegram. Historial de eventos registrados con fecha y hora. Control mediante menú interactivo en Telegram — sin necesidad de aplicaciones adicionales. Compatible con sensores de puerta, ventana y botón de pánico. Sirena exterior de larga durabilidad y alta potencia sonora. Detección y notificación inmediata ante cortes de energía eléctrica. Batería de respaldo que mantiene el sistema activo sin suministro eléctrico. Monitoreo del nivel de carga de la batería con alertas cuando requiere atención. Control de luces Zigbee integrado al sistema de seguridad. Activación automática de luces ante detección de alarma. Automatización por horario o evento. Control de cargas eléctricas mediante relés.');
-  h += cfgTxt('Zpro Black','cfg-desc-Black', cfg.desc_Black||'Activación y desactivación del sistema desde el celular, en cualquier momento y desde cualquier lugar. Notificaciones instantáneas ante cualquier evento de seguridad — apertura de puertas, ventanas o activación de sensores. Monitoreo del estado del sistema en tiempo real desde Telegram. Historial de eventos registrados con fecha y hora. Control mediante menú interactivo en Telegram — sin necesidad de aplicaciones adicionales. Compatible con sensores de puerta, ventana y botón de pánico. Sirena exterior de larga durabilidad y alta potencia sonora. Detección y notificación inmediata ante cortes de energía eléctrica. Batería de respaldo que mantiene el sistema activo sin suministro eléctrico. Monitoreo del nivel de carga de la batería con alertas cuando requiere atención. Control de luces Zigbee integrado al sistema de seguridad. Activación automática de luces ante detección de alarma. Automatización por horario o evento. Control de cargas eléctricas mediante relés. Simulador de presencia inteligente con sincronización horaria NTP, activación en horario nocturno y secuencias aleatorias de luces. Gestión de múltiples usuarios con perfiles de acceso diferenciados. Historial extendido de eventos del sistema. Automatizaciones personalizadas adaptadas a las necesidades del inmueble.');
+  h += cfgTxt('AquaOne','cfg-desc-AquaOne', cfg.desc_AquaOne||'Sistema de riego automático básico con control remoto vía Telegram. Riego programado por horario, activación y desactivación desde el celular en cualquier momento y desde cualquier lugar. Notificaciones instantáneas de cada ciclo de riego. Historial de eventos registrados con fecha y hora. Control mediante menú interactivo en Telegram — sin necesidad de aplicaciones adicionales.');
+  h += cfgTxt('AquaDuo','cfg-desc-AquaDuo', cfg.desc_AquaDuo||'Todo lo de AquaOne, más sensor de humedad de suelo (Mi Flora): el riego se ajusta según la condición real de la tierra, no solo por horario fijo. Notificación cuando el sensor detecta batería baja.');
+  h += cfgTxt('AquaTrio','cfg-desc-AquaTrio', cfg.desc_AquaTrio||'Todo lo de AquaDuo, más protección antihelada: monitoreo de temperatura ambiente en tiempo real y activación preventiva del riego ante riesgo de helada de irradiación, sin intervención humana.');
+  h += cfgTxt('AquaPro','cfg-desc-AquaPro', cfg.desc_AquaPro||'Todo lo de AquaTrio, más sensor de nivel de reservorio y lógica adaptativa completa: cruza humedad de suelo, temperatura ambiente y pronóstico meteorológico para decidir cuándo y cuánto regar.');
+  h += cfgTxt('AquaMax','cfg-desc-AquaMax', cfg.desc_AquaMax||'Máxima prestación: múltiples zonas de riego independientes controladas desde un mismo equipo, historial extendido de ciclos y decisiones del sistema, y soporte prioritario.');
   el.innerHTML = h;
 }
 
@@ -3184,10 +3188,11 @@ function saveConfig(){
   DB.config.firma = g('cfg-firma');
   DB.config.metaMensual = parseFloat((g('cfg-meta-mensual')||'0').replace(/\./g,'').replace(',','.'))||0;
   DB.config.tipoCambio = parseFloat(g('cfg-tc'))||1;
-  DB.config.desc_Base = g('cfg-desc-Base');
-  DB.config.desc_Energy = g('cfg-desc-Energy');
-  DB.config.desc_Comfort = g('cfg-desc-Comfort');
-  DB.config.desc_Black = g('cfg-desc-Black');
+  DB.config.desc_AquaOne = g('cfg-desc-AquaOne');
+  DB.config.desc_AquaDuo = g('cfg-desc-AquaDuo');
+  DB.config.desc_AquaTrio = g('cfg-desc-AquaTrio');
+  DB.config.desc_AquaPro = g('cfg-desc-AquaPro');
+  DB.config.desc_AquaMax = g('cfg-desc-AquaMax');
   if(_saveTimer) clearTimeout(_saveTimer);
   _saveTimer = setTimeout(function(){ save(); }, 800);
 }
@@ -3383,12 +3388,12 @@ function reporteContainer(titulo, html){
 }
 
 function reporteClientes(){
-  var modelos=['Base','Energy','Comfort','Black'];
+  var modelos=['AquaOne','AquaDuo','AquaTrio','AquaPro','AquaMax'];
   var activos=DB.clientes.filter(function(c){return c.estado==='Activo';});
   var bajas=DB.clientes.filter(function(c){return c.estado==='Baja';});
 
   // Summary stats
-  var h='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">';
+  var h='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">';
   modelos.forEach(function(m){
     var n=activos.filter(function(c){return c.modelo===m;}).length;
     h+='<div class="stat"><div class="stat-n">'+n+'</div><div class="stat-l">'+m+'</div></div>';
@@ -3841,7 +3846,7 @@ function reporteVencimientos(){
   clientes.forEach(function(c){
     if(c.equipo && c.equipo.ups_gar_vence){
       var dias = Math.round((new Date(c.equipo.ups_gar_vence)-new Date())/86400000);
-      items.push({cliente:c.nombre, lote:c.lote||'', barrio:c.barrio||'', equipo:'UPS '+( c.equipo.ups_marca||'')+' '+(c.equipo.ups_modelo||''), vence:c.equipo.ups_gar_vence, dias:dias});
+      items.push({cliente:c.nombre, lote:c.lote||'', barrio:c.barrio||'', equipo:'Actuador '+( c.equipo.ups_marca||'')+' '+(c.equipo.ups_modelo||''), vence:c.equipo.ups_gar_vence, dias:dias});
     }
   });
 
@@ -3930,7 +3935,7 @@ function reporteMantenimientos(){
         cliente: c.nombre,
         lote: c.lote||'',
         barrio: c.barrio||'',
-        modelo: c.modelo||'Base',
+        modelo: c.modelo||'AquaOne',
         fecha: m.fecha||'',
         tipo: m.tipo||'—',
         motivo: m.motivo||'—',
@@ -4134,7 +4139,7 @@ function renderReportes(){
   var hace90 = new Date(Date.now()-90*86400000).toISOString().slice(0,10);
 
   // 1. Clientes por modelo
-  var modelos = ['Base','Energy','Comfort','Black'];
+  var modelos = ['AquaOne','AquaDuo','AquaTrio','AquaPro','AquaMax'];
   var porModelo = {};
   modelos.forEach(function(m){ porModelo[m]=0; });
   DB.clientes.filter(function(c){return c.estado==='Activo';}).forEach(function(c){
@@ -4508,7 +4513,7 @@ function renderGestion(){
     var tc=(DB.config&&DB.config.tipoCambio)||1;
     h+='<div class="card" style="margin-bottom:12px">'+
       '<div class="ch">'+
-        '<div class="ct">'+cli+' — '+(pres?'Zpro '+(pres.modelo||''):'')+'</div>'+
+        '<div class="ct">'+cli+' — '+(pres?(pres.modelo||''):'')+'</div>'+
         '<div style="display:flex;gap:6px">'+
           '<button class="btn btn-sm" onclick="editarGestion('+g.id+')">✏️</button>'+
           '<button class="btn btn-sm btn-p" onclick="pdfGestion('+g.id+')">📄 PDF</button>'+
@@ -4685,7 +4690,7 @@ function pdfGestion(id){
   w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Gestión — '+g.clienteNombre+'</title><style>'+css+'</style></head><body>'+
     '<button class="btn" onclick="window.print()">🖨️ Imprimir</button>'+
     '<h1>GESTIÓN ECONÓMICA</h1>'+
-    '<div class="meta">'+empresa+' · '+(pres?presNum(pres)+' — Zpro '+(pres.modelo||''):'')+'</div>'+
+    '<div class="meta">'+empresa+' · '+(pres?presNum(pres)+' — '+(pres.modelo||''):'')+'</div>'+
     '<h2>Datos del cliente</h2>'+
     '<div class="grid">'+
       '<div class="box"><div class="l">Cliente</div><div class="v">'+g.clienteNombre+'</div></div>'+
@@ -4736,7 +4741,7 @@ function pdfRecibo(fondoId){
   if(!fondo) return;
 
   var empresa = (DB.config&&DB.config.empresa)||'Riego Adaptativo';
-  var empresaSub = (DB.config&&DB.config.desc_Base)?'Ingeniería en Sistemas de Seguridad':'Ingeniería en Sistemas de Seguridad';
+  var empresaSub = 'Ingeniería en Sistemas de Riego';
   var tc = (DB.config&&DB.config.tipoCambio)||1;
 
   // Get client data
@@ -4764,7 +4769,7 @@ function pdfRecibo(fondoId){
     var yr2=new Date(pres.fecha||today()).getFullYear();
     return 'VSS-'+yr2+'-'+String(pres.correlativo||pres.id).padStart(4,'0');
   })() : '—';
-  var presModelo = pres ? ('Zpro '+(pres.modelo||'Base')) : '—';
+  var presModelo = pres ? (pres.modelo||'AquaOne') : '—';
 
   var reciboHTML = function(num){
     return '<div class="recibo">'+
@@ -4784,7 +4789,7 @@ function pdfRecibo(fondoId){
         '<div class="l">Domicilio</div><div class="v">'+(cliente?(cliente.lote||'—')+(cliente.barrio?' · '+cliente.barrio:''):'—')+'</div>'+
         '<div class="l">Teléfono</div><div class="v">'+(cliente?cliente.tel||'—':'—')+'</div>'+
         '<div class="l">Presupuesto</div><div class="v">'+presNum+(presModelo!=='—'?' — '+presModelo:'')+'</div>'+
-        '<div class="l">Concepto</div><div class="v">Anticipo por instalación sistema de alarma IoT</div>'+
+        '<div class="l">Concepto</div><div class="v">Anticipo por instalación de sistema de riego</div>'+
       '</div>'+
       '<div class="monto-box">'+
         '<div class="monto-label">Monto recibido</div>'+
@@ -5234,7 +5239,7 @@ function renderActa(){
       '<div>'+
         '<div style="font-size:12px;color:var(--text2)">Acta N°: <strong>'+numActa+'</strong></div>'+
         '<div style="font-size:12px;color:var(--text2)">Cliente: <strong>'+c.nombre+'</strong></div>'+
-        '<div style="font-size:12px;color:var(--text2)">Modelo: <strong>Zpro '+(c.modelo||'Base')+'</strong></div>'+
+        '<div style="font-size:12px;color:var(--text2)">Modelo: <strong>'+(c.modelo||'AquaOne')+'</strong></div>'+
       '</div>'+
       '<button class="btn btn-p" onclick="generarPDFActa('+c.id+')">📄 Generar acta PDF</button>'+
     '</div>'+
@@ -5295,7 +5300,7 @@ function generarPDFActa(cid){
   var garantiaAlc = c.actaGarantiaAlcance||'materiales y mano de obra';
   var garantia = garantiaDur+' — '+garantiaAlc;
 
-  // Dispositivos Zigbee
+  // Sensores de riego instalados (internamente: "zigbee")
   var zigbeeRows = '';
   if(c.zigbee&&c.zigbee.length){
     zigbeeRows = c.zigbee.map(function(d){
@@ -5351,7 +5356,7 @@ function generarPDFActa(cid){
     '<div class="section">'+
       '<div class="section-title">Sistema instalado</div>'+
       '<div class="grid">'+
-        '<div class="field"><div class="l">Modelo</div><div class="v">Zpro '+(c.modelo||'Base')+'</div></div>'+
+        '<div class="field"><div class="l">Modelo</div><div class="v">'+(c.modelo||'AquaOne')+'</div></div>'+
         '<div class="field"><div class="l">Versión firmware</div><div class="v">'+(c.version||'—')+'</div></div>'+
         '<div class="field"><div class="l">N° de serie</div><div class="v">'+(c.equipo&&c.equipo.esp_serie||'—')+'</div></div>'+
         '<div class="field"><div class="l">Fecha de instalación</div><div class="v">'+(c.fecha||fecha)+'</div></div>'+
@@ -5369,8 +5374,8 @@ function generarPDFActa(cid){
     '<div class="declaracion">'+
       '<strong>DECLARACIÓN DE CONFORMIDAD</strong><br><br>'+
       'El/la Sr./Sra. <strong>'+c.nombre+'</strong>, en carácter de titular del inmueble ubicado en '+
-      (c.lote||'el domicilio indicado')+(c.barrio?', '+c.barrio:'')+', declara haber recibido el sistema de seguridad '+
-      'Zpro '+(c.modelo||'Base')+' instalado y en correcto funcionamiento, habiendo verificado personalmente '+
+      (c.lote||'el domicilio indicado')+(c.barrio?', '+c.barrio:'')+', declara haber recibido el sistema de riego '+
+      (c.modelo||'AquaOne')+' instalado y en correcto funcionamiento, habiendo verificado personalmente '+
       'la operación de todos los dispositivos listados y recibido la capacitación necesaria para su uso.<br><br>'+
       'A partir de la fecha de firma del presente documento comienza a regir el período de <strong>garantía de '+garantia+'</strong>.'+
     '</div>'+
@@ -6445,7 +6450,7 @@ function abrirPI(id){
         '<td style="padding:5px 10px;font-family:monospace;font-size:11px">'+(item.compCodigo||'—')+'</td>'+
         '<td style="padding:5px 10px;font-size:11px">'+item.compNombre+'</td>'+
         '<td style="padding:5px 10px;text-align:center">'+item.cant+'</td>'+
-        '<td style="padding:5px 10px;font-size:10px;color:var(--text2)">'+(item.origen==='zigbee'?'Zigbee cliente':item.origen==='kit-base'?'Kit base':'Manual')+'</td>'+
+        '<td style="padding:5px 10px;font-size:10px;color:var(--text2)">'+(item.origen==='zigbee'?'Sensor cliente':item.origen==='kit-base'?'Kit base':'Manual')+'</td>'+
         '<td style="padding:5px 10px;text-align:center;font-weight:700;color:'+stockColor+'">'+(typeof stock==='number'?stock:'—')+'</td>'+
         '<td style="padding:5px 10px"><button class="btn btn-sm" style="color:var(--red)" onclick="quitarMatInst('+id+','+i+')">🗑️</button></td>'+
       '</tr>';
@@ -7028,13 +7033,13 @@ function modalNuevoMant(){
         '<select id="mn-cli" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;width:100%" onchange="onChangeMantCliente()">'+
           '<option value="">-- seleccionar cliente --</option>'+clienteOpts+
         '</select></div>'+
-      '<div class="fg"><label>N° Serie sistema</label><input id="mn-ns" placeholder="VSS-K2605-02-001"></div>'+
+      '<div class="fg"><label>N° Serie sistema</label><input id="mn-ns" placeholder="AQ-2026-001"></div>'+
       '<div class="fg"><label>Tipo *</label>'+
         '<select id="mn-ti" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;width:100%">'+
           tipoOpts.map(function(t){return '<option>'+t+'</option>';}).join('')+
         '</select></div>'+
       '<div class="fg"><label>Garantía válida hasta</label><input id="mn-gv" type="date"></div>'+
-      '<div class="fg full"><label>Motivo del llamado *</label><input id="mn-mo" placeholder="Ej: Sirena no activa, falsa alarma..."></div>'+
+      '<div class="fg full"><label>Motivo del llamado *</label><input id="mn-mo" placeholder="Ej: Válvula no cierra, sensor sin señal..."></div>'+
       '<div class="fg full"><label>Falla detectada</label><textarea id="mn-fa" rows="2" placeholder="Describir la falla..."></textarea></div>'+
       '<div class="fg full"><label>Reparación realizada</label><textarea id="mn-re" rows="2" placeholder="Describir lo realizado..."></textarea></div>'+
       '<div class="fg full"><label>Material a facturar</label><input id="mn-mf" placeholder="Material a facturar al cliente"></div>'+
@@ -7099,7 +7104,7 @@ function modalEditarMant(numero){
       '<div class="fg"><label>Cliente</label><div style="padding:6px 9px;font-size:12px;font-weight:700">'+(m.clienteNombre||'—')+'</div></div>'+
       '<div class="fg"><label>Fecha</label><input id="me-f" type="date" value="'+(m.fecha||today())+'"></div>'+
       '<div class="fg"><label>Técnico</label><input id="me-te" value="'+(m.tecnico||'')+'" placeholder="Nombre del técnico"></div>'+
-      '<div class="fg"><label>N° Serie sistema</label><input id="me-ns" value="'+(m.nserie||'')+'" placeholder="VSS-K2605-02-001"></div>'+
+      '<div class="fg"><label>N° Serie sistema</label><input id="me-ns" value="'+(m.nserie||'')+'" placeholder="AQ-2026-001"></div>'+
       '<div class="fg"><label>Tipo</label>'+
         '<select id="me-ti" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;width:100%">'+
           tipoOpts.map(function(t){return '<option'+(t===m.tipo?' selected':'')+'>'+t+'</option>';}).join('')+
