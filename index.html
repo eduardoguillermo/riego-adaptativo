@@ -131,12 +131,12 @@ function toggleNav(el){
 
     <!-- CLIENTES -->
     <div class="panel on" id="panel-clientes">
-      <div class="stats stats-6" id="stats-box"></div>
+      <div class="stats stats-7" id="stats-box"></div>
       <div class="sbar">
         <input type="text" id="qc" placeholder="🔍 Buscar nombre, lote o barrio..." oninput="renderClientes()">
         <select id="fc-modelo" onchange="renderClientes()">
           <option value="">Todos los modelos</option>
-          <option>Base</option><option>Energy</option><option>Comfort</option><option>Black</option>
+          <option>AquaOne</option><option>AquaDuo</option><option>AquaTrio</option><option>AquaPro</option><option>AquaMax</option>
         </select>
         <select id="fc-estado" onchange="renderClientes()">
           <option value="">Todos</option><option>Activo</option><option>Baja</option>
@@ -163,8 +163,8 @@ function toggleNav(el){
             <div class="fg"><label>Lote / unidad *</label><input id="al" placeholder="Lote 42"></div>
             <div class="fg"><label>Barrio</label><input id="aba" placeholder="Ej: Villa del Parque"></div>
             <div class="fg"><label>Teléfono *</label><input id="at" placeholder="+54 9 261..."></div>
-            <div class="fg"><label>Modelo Zpro</label>
-              <select id="am"><option>Base</option><option>Energy</option><option>Comfort</option><option>Black</option></select>
+            <div class="fg"><label>Modelo AquaSeries</label>
+              <select id="am"><option>AquaOne</option><option>AquaDuo</option><option>AquaTrio</option><option>AquaPro</option><option>AquaMax</option></select>
             </div>
             <div class="fg"><label>Versión instalada</label><input id="av" placeholder="v2.4.1"></div>
             <div class="fg"><label>Fecha instalación</label><input id="af" type="date"></div>
@@ -186,9 +186,9 @@ function toggleNav(el){
     <div class="panel" id="panel-detalle">
       <div id="det-head" style="margin-bottom:10px"></div>
       <div class="subnav">
-        <div class="sni on" id="sni-datos" onclick="goSub('datos')">📋 Datos Zpro</div>
+        <div class="sni on" id="sni-datos" onclick="goSub('datos')">📋 Datos del cliente</div>
         <div class="sni" id="sni-equipo" onclick="goSub('equipo')">🔧 Equipamiento</div>
-        <div class="sni" id="sni-zigbee" onclick="goSub('zigbee')">📡 Instalación Zigbee</div>
+        <div class="sni" id="sni-zigbee" onclick="goSub('zigbee')">💧 Sensores de riego</div>
         <div class="sni" id="sni-ota" onclick="goSub('ota')">🔄 Historial OTA</div>
         <div class="sni" id="sni-mant" onclick="goSub('mant')">🛠️ Mantenimiento</div>
       <div class="sni" id="sni-acta" onclick="goSub('acta')">📄 Acta</div>
@@ -197,7 +197,7 @@ function toggleNav(el){
       <!-- SP DATOS -->
       <div class="sp on" id="sp-datos">
         <div class="card">
-          <div class="card-head"><div class="card-title">📋 Datos del cliente y equipo Zpro</div>
+          <div class="card-head"><div class="card-title">📋 Datos del cliente y equipo AquaSeries</div>
             <button class="btn btn-sm" onclick="editarDatos()">✏️ Editar</button>
           </div>
           <div class="card-body" id="cont-datos"></div>
@@ -218,8 +218,8 @@ function toggleNav(el){
       <div class="sp" id="sp-zigbee">
         <div class="card">
           <div class="card-head">
-            <div class="card-title">📡 Dispositivos Zigbee instalados</div>
-            <button class="btn btn-sm btn-p" onclick="modalZigbee()">➕ Agregar dispositivo</button>
+            <div class="card-title">💧 Sensores de riego instalados</div>
+            <button class="btn btn-sm btn-p" onclick="modalZigbee()">➕ Agregar sensor</button>
           </div>
           <div class="twrap" id="cont-zigbee"></div>
         </div>
@@ -411,7 +411,7 @@ function toggleNav(el){
     <div class="panel" id="panel-tipos">
       <div class="card">
         <div class="card-head">
-          <div class="card-title">⚙️ Tipos de sensor Zigbee</div>
+          <div class="card-title">⚙️ Tipos de sensor</div>
           <div style="display:flex;gap:6px">
             <input id="nuevo-tipo" placeholder="Nuevo tipo..." style="padding:4px 8px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;width:160px">
             <button class="btn btn-sm btn-p" onclick="agregarTipo()">➕ Agregar</button>
