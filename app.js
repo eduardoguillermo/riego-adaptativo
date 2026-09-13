@@ -916,7 +916,7 @@ function vssMostrarSnapshots(){
       '<td style="padding:8px 6px;font-size:13px">'+vssFmtTs(b.ts)+'</td>'+
       '<td style="padding:8px 6px;font-size:12px;color:'+(b.manual?'#1B5E20':'#666')+'">'+b.label+'</td>'+
       '<td style="padding:8px 6px;text-align:right">'+
-        '<button onclick="vssRestaurarSnapshot('+b.ts+')" style="background:#7F0000;color:#fff;border:none;border-radius:4px;padding:3px 10px;font-size:12px;cursor:pointer;margin-right:4px">Restaurar</button>'+
+        '<button onclick="vssRestaurarSnapshot('+b.ts+')" style="background:#1A4A63;color:#fff;border:none;border-radius:4px;padding:3px 10px;font-size:12px;cursor:pointer;margin-right:4px">Restaurar</button>'+
         '<button onclick="vssBorrarSnapshot('+b.ts+')" style="background:#B71C1C;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:12px;cursor:pointer">✕</button>'+
       '</td></tr>';
   }).join('') : '<tr><td colspan="3" style="padding:16px;text-align:center;color:#AAA">Sin snapshots guardados</td></tr>';
@@ -938,7 +938,7 @@ function vssMostrarSnapshots(){
         '</tr></thead><tbody>'+rows+'</tbody>'+
       '</table>'+
       '<div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center">'+
-        '<button onclick="vssHacerSnapshot(true);vssMostrarSnapshots();" style="background:#B71C1C;color:#fff;border:none;border-radius:4px;padding:6px 14px;font-size:13px;cursor:pointer">📸 Guardar snapshot ahora</button>'+
+        '<button onclick="vssHacerSnapshot(true);vssMostrarSnapshots();" style="background:#256282;color:#fff;border:none;border-radius:4px;padding:6px 14px;font-size:13px;cursor:pointer">📸 Guardar snapshot ahora</button>'+
         '<button onclick="document.getElementById(\'modal-vss-snapshots\').remove()" style="background:#F2F2F2;color:#222;border:none;border-radius:4px;padding:6px 14px;font-size:13px;cursor:pointer">Cerrar</button>'+
       '</div>'+
     '</div>';
@@ -1067,7 +1067,7 @@ function vssMostrarBannerReauthCarpeta(handle){
   b.id = 'vss-reauth-carpeta';
   b.style.cssText = 'position:fixed;bottom:16px;left:16px;background:#1A1A1A;color:#fff;padding:10px 14px;border-radius:8px;z-index:9998;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.3);font-size:12.5px;max-width:340px';
   b.innerHTML = '🔒 La carpeta local ('+handle.name+') necesita que confirmes el acceso de nuevo.'+
-    '<button id="vss-reauth-btn" style="background:#B71C1C;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Reautorizar</button>'+
+    '<button id="vss-reauth-btn" style="background:#256282;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Reautorizar</button>'+
     '<span id="vss-reauth-x" style="cursor:pointer;color:#AAA;padding:0 2px">✕</span>';
   document.body.appendChild(b);
   document.getElementById('vss-reauth-x').onclick = function(){ b.remove(); };
@@ -1364,7 +1364,7 @@ function vssMostrarModalDrive(arch, token){
       'style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:6px;border:1px solid #DDD;margin-bottom:8px;cursor:pointer" '+
       'onmouseover="this.style.background=\'#F7F7F7\'" onmouseout="this.style.background=\'\'">'+
       '<div><div style="font-size:13px;font-weight:700;color:#222">'+label+'</div><div style="font-size:11px;color:#666">'+fecha+(esAuto?' · sync automático':'')+'</div></div>'+
-      '<span style="font-size:11px;color:#B71C1C;font-weight:700">Restaurar →</span></div>';
+      '<span style="font-size:11px;color:#256282;font-weight:700">Restaurar →</span></div>';
   }).join('') : '<p style="color:#666;text-align:center;padding:20px">Sin backups en Drive. Usá ☁️ Subir para crear el primero.</p>';
   const ov = document.createElement('div');
   ov.id='modal-vss-drive';
@@ -1802,19 +1802,19 @@ function generarPDF(id){
 
   const CSS='*{box-sizing:border-box;margin:0;padding:0}body{font-family:Segoe UI,Arial,sans-serif;color:#222;font-size:12px}'+
     '@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.no-print{display:none}@page{margin:15mm 12mm}}'+
-    '.header{background:#111;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:14px}'+
-    '.header img{width:52px;height:52px;border-radius:50%;border:2px solid #B71C1C}'+
+    '.header{background:#0D1B24;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:14px}'+
+    '.header img{width:52px;height:52px;border-radius:50%;border:2px solid #256282}'+
     '.header h1{font-size:16px;font-weight:700}.header p{font-size:10px;color:#aaa;margin-top:1px}'+
     '.hr{margin-left:auto;text-align:right}.pn{font-size:14px;font-weight:700;letter-spacing:.5px}.ps{font-size:10px;color:#aaa;margin-top:2px}'+
     '.body{padding:16px 24px}.section{margin-bottom:14px}'+
-    '.st{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#B71C1C;border-bottom:2px solid #B71C1C;padding-bottom:3px;margin-bottom:10px}'+
+    '.st{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#256282;border-bottom:2px solid #256282;padding-bottom:3px;margin-bottom:10px}'+
     '.g2{display:grid;grid-template-columns:1fr 1fr;gap:7px}'+
     '.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}'+
     '.field{background:#f8f8f8;border-radius:5px;padding:6px 9px}'+
     '.field .fl{font-size:8px;color:#999;font-weight:700;text-transform:uppercase;margin-bottom:1px}'+
     '.field .fv{font-size:12px;font-weight:500}'+
     'table.t{width:100%;border-collapse:collapse}'+
-    'table.t th{background:#B71C1C;color:#fff;padding:7px 11px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase}'+
+    'table.t th{background:#256282;color:#fff;padding:7px 11px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase}'+
     'table.t td{padding:6px 11px;border-bottom:1px solid #eee;font-size:11px}'+
     'table.t tfoot td{background:#f8f8f8}'+
     '.validez{background:#FFF8E1;border:1px solid #FFD54F;border-radius:5px;padding:7px 11px;margin-bottom:14px;font-size:11px;color:#7B4F00}'+
@@ -1822,9 +1822,9 @@ function generarPDF(id){
     '.mdesc{font-size:11px;color:#555;line-height:1.4}'+
     '.cg{display:grid;grid-template-columns:1fr 1fr;gap:7px}'+
     '.leyenda{padding:8px 24px;background:#f0f0f0;border-top:1px solid #ddd;font-size:9px;color:#888;font-style:italic;line-height:1.4}'+
-    '.footer{padding:10px 24px;background:#f5f5f5;border-top:3px solid #B71C1C;display:flex;justify-content:space-between;align-items:center}'+
+    '.footer{padding:10px 24px;background:#f5f5f5;border-top:3px solid #256282;display:flex;justify-content:space-between;align-items:center}'+
     '.footer div{font-size:9px;color:#888}'+
-    '.btn-print{position:fixed;top:12px;right:12px;background:#B71C1C;color:#fff;border:none;padding:8px 18px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600}';
+    '.btn-print{position:fixed;top:12px;right:12px;background:#256282;color:#fff;border:none;padding:8px 18px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600}';
 
   const body=
     '<button class="btn-print no-print" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>'+
@@ -1875,7 +1875,7 @@ function generarPDF(id){
         '</tbody>'+
         '<tfoot>'+
           '<tr><td colspan="2" style="padding:9px 11px;font-weight:700;font-size:13px">TOTAL</td>'+
-            '<td style="padding:9px 11px;text-align:right;font-weight:700;font-size:16px;color:#B71C1C">'+formatMonto(totalFinal,p.moneda)+'</td></tr>'+
+            '<td style="padding:9px 11px;text-align:right;font-weight:700;font-size:16px;color:#256282">'+formatMonto(totalFinal,p.moneda)+'</td></tr>'+
         '</tfoot>'+
       '</table>'+
     '</div>'+
@@ -1958,13 +1958,13 @@ function pdfStock(){
   });
 
   var css='*{box-sizing:border-box;margin:0;padding:0}body{font-family:Segoe UI,Arial,sans-serif;padding:20px;font-size:11px}'+
-    'h1{font-size:16px;font-weight:700;color:#B71C1C;margin-bottom:2px}'+
+    'h1{font-size:16px;font-weight:700;color:#256282;margin-bottom:2px}'+
     '.meta{font-size:11px;color:#666;margin-bottom:14px}'+
     'table{width:100%;border-collapse:collapse}'+
-    'th{background:#B71C1C;color:#fff;padding:6px 8px;text-align:left;font-size:10px}'+
+    'th{background:#256282;color:#fff;padding:6px 8px;text-align:left;font-size:10px}'+
     'td{padding:5px 8px;border-bottom:1px solid #eee}'+
     'tfoot td{background:#f5f5f5;font-weight:700}'+
-    '.btn-print{position:fixed;top:12px;right:12px;background:#B71C1C;color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-size:11px}'+
+    '.btn-print{position:fixed;top:12px;right:12px;background:#256282;color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-size:11px}'+
     '@media print{.btn-print{display:none}}';
 
   var w=window.open('','_blank');
@@ -1975,7 +1975,7 @@ function pdfStock(){
     '<table><thead><tr><th>Código</th><th>Descripción</th><th>Categoría</th><th>Área</th><th>Ubicación</th><th style="text-align:center">Stock</th><th style="text-align:center">Mín.</th><th style="text-align:right">Precio</th><th style="text-align:right">Valor</th></tr></thead>'+
     '<tbody>'+rows+'</tbody>'+
     '<tfoot><tr><td colspan="8" style="text-align:right;padding:7px 8px">VALOR TOTAL</td>'+
-    '<td style="text-align:right;padding:7px 8px;color:#B71C1C">$'+Math.round(totalVal).toLocaleString('es-AR')+'</td></tr>'+
+    '<td style="text-align:right;padding:7px 8px;color:#256282">$'+Math.round(totalVal).toLocaleString('es-AR')+'</td></tr>'+
     (tc>1?'<tr><td colspan="8" style="text-align:right;padding:5px 8px;color:#666">Equivalente U$S</td><td style="text-align:right;padding:5px 8px;color:#666">U$S '+(totalVal/tc).toFixed(0)+'</td></tr>':'')+
     '</tfoot></table></body></html>');
   w.document.close();
@@ -2180,10 +2180,10 @@ function pdfCatalogo(){
   }).join('');
 
   var css='*{box-sizing:border-box;margin:0;padding:0}body{font-family:Segoe UI,Arial,sans-serif;padding:20px;font-size:11px}'+
-    'h1{font-size:15px;color:#B71C1C;margin-bottom:2px}.meta{color:#666;font-size:10px;margin-bottom:12px}'+
-    'table{width:100%;border-collapse:collapse}th{background:#B71C1C;color:#fff;padding:6px 8px;font-size:10px;text-align:left}'+
+    'h1{font-size:15px;color:#256282;margin-bottom:2px}.meta{color:#666;font-size:10px;margin-bottom:12px}'+
+    'table{width:100%;border-collapse:collapse}th{background:#256282;color:#fff;padding:6px 8px;font-size:10px;text-align:left}'+
     'td{padding:5px 8px;border-bottom:1px solid #eee}'+
-    '.btn{position:fixed;top:12px;right:12px;background:#B71C1C;color:#fff;border:none;padding:6px 14px;border-radius:5px;cursor:pointer}'+
+    '.btn{position:fixed;top:12px;right:12px;background:#256282;color:#fff;border:none;padding:6px 14px;border-radius:5px;cursor:pointer}'+
     '@media print{.btn{display:none}}';
 
   var w=window.open('','_blank');
@@ -3023,12 +3023,12 @@ function pdfOrden(id){
   const w=window.open('','_blank');
   w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Orden #'+o.id+'</title>'+
     '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Segoe UI,Arial,sans-serif;padding:28px;font-size:13px}'+
-    'h1{font-size:18px;font-weight:700;color:#B71C1C;margin-bottom:4px}'+
+    'h1{font-size:18px;font-weight:700;color:#256282;margin-bottom:4px}'+
     '.meta{font-size:12px;color:#666;margin-bottom:20px}'+
-    'table{width:100%;border-collapse:collapse}th{background:#B71C1C;color:#fff;padding:8px 12px;text-align:left;font-size:11px}'+
+    'table{width:100%;border-collapse:collapse}th{background:#256282;color:#fff;padding:8px 12px;text-align:left;font-size:11px}'+
     'td{padding:7px 12px;border-bottom:1px solid #eee;font-size:12px}'+
     'tfoot td{background:#f8f8f8;font-weight:700}'+
-    '.btn-print{position:fixed;top:14px;right:14px;background:#B71C1C;color:#fff;border:none;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:12px}'+
+    '.btn-print{position:fixed;top:14px;right:14px;background:#256282;color:#fff;border:none;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:12px}'+
     '@media print{.btn-print{display:none}}</style></head><body>'+
     '<button class="btn-print" onclick="window.print()">🖨️ Imprimir</button>'+
     '<h1>ORDEN DE COMPRA — '+(o.numero||'OC')+'</h1>'+
@@ -3038,7 +3038,7 @@ function pdfOrden(id){
     '<table><thead><tr><th>Código</th><th>Descripción</th><th style="text-align:center">Cantidad</th><th style="text-align:right">P. unitario</th><th style="text-align:right">Subtotal</th><th>Ubicación</th></tr></thead>'+
     '<tbody>'+rows+'</tbody>'+
     '<tfoot><tr><td colspan="4" style="text-align:right;padding:8px 12px">TOTAL ESTIMADO</td>'+
-    '<td style="text-align:right;padding:8px 12px;color:#B71C1C">$'+Math.round(total).toLocaleString('es-AR')+'</td><td></td></tr></tfoot>'+
+    '<td style="text-align:right;padding:8px 12px;color:#256282">$'+Math.round(total).toLocaleString('es-AR')+'</td><td></td></tr></tfoot>'+
     '</table></body></html>');
   w.document.close();
 }
@@ -3272,7 +3272,7 @@ function reporteFinanciero(){
     '</tr></thead>'+
     '<tbody>'+rows+'</tbody>'+
     '<tfoot>'+
-      '<tr style="font-weight:700;background:#1a1a1a;color:#fff">'+
+      '<tr style="font-weight:700;background:#0D1B24;color:#fff">'+
         '<td style="padding:8px 10px">CONSOLIDADO</td>'+
         '<td style="padding:8px 10px;text-align:right">$'+Math.round(totalSistemas).toLocaleString('es-AR')+'</td>'+
         '<td style="padding:8px 10px;text-align:right">$'+Math.round(totalAdelantos).toLocaleString('es-AR')+'</td>'+
@@ -3325,15 +3325,15 @@ function imprimirReporteFinanciero(){
   var totalPendiente=totalSistemas-totalCobrado;
 
   var css='*{box-sizing:border-box;margin:0;padding:0}body{font-family:Segoe UI,Arial,sans-serif;padding:24px;font-size:12px}'+
-    'h1{font-size:16px;color:#B71C1C;margin-bottom:2px}.meta{font-size:11px;color:#666;margin-bottom:16px}'+
+    'h1{font-size:16px;color:#256282;margin-bottom:2px}.meta{font-size:11px;color:#666;margin-bottom:16px}'+
     '.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}'+
     '.stat{background:#f5f5f5;border-radius:6px;padding:10px;text-align:center}'+
     '.stat .n{font-size:15px;font-weight:700;margin-bottom:2px}.stat .l{font-size:9px;color:#888;text-transform:uppercase}'+
     'table{width:100%;border-collapse:collapse}'+
-    'th{background:#B71C1C;color:#fff;padding:7px 10px;font-size:10px;text-align:left}'+
+    'th{background:#256282;color:#fff;padding:7px 10px;font-size:10px;text-align:left}'+
     'td{padding:6px 10px;border-bottom:1px solid #eee}'+
     'tfoot td{background:#222;color:#fff;font-weight:700}'+
-    '.btn{position:fixed;top:12px;right:12px;background:#B71C1C;color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer}'+
+    '.btn{position:fixed;top:12px;right:12px;background:#256282;color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer}'+
     '@media print{.btn{display:none}@page{margin:12mm}}';
 
   var w=window.open('','_blank');
@@ -4077,10 +4077,10 @@ function pdfReporteMantenimientos(){
       '<td>'+m.tecnico+'</td></tr>';
   }).join('');
   var css='*{box-sizing:border-box;margin:0;padding:0}body{font-family:Segoe UI,Arial,sans-serif;padding:20px;font-size:11px}'+
-    'h1{font-size:15px;color:#B71C1C;margin-bottom:2px}.meta{color:#666;font-size:10px;margin-bottom:12px}'+
-    'table{width:100%;border-collapse:collapse}th{background:#B71C1C;color:#fff;padding:6px 8px;font-size:10px;text-align:left}'+
+    'h1{font-size:15px;color:#256282;margin-bottom:2px}.meta{color:#666;font-size:10px;margin-bottom:12px}'+
+    'table{width:100%;border-collapse:collapse}th{background:#256282;color:#fff;padding:6px 8px;font-size:10px;text-align:left}'+
     'td{padding:5px 8px;border-bottom:1px solid #eee}tfoot td{background:#222;color:#fff;font-weight:700}'+
-    '.btn{position:fixed;top:12px;right:12px;background:#B71C1C;color:#fff;border:none;padding:6px 14px;border-radius:5px;cursor:pointer}'+
+    '.btn{position:fixed;top:12px;right:12px;background:#256282;color:#fff;border:none;padding:6px 14px;border-radius:5px;cursor:pointer}'+
     '@media print{.btn{display:none}}';
   var w=window.open('','_blank');
   w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Mantenimientos</title><style>'+css+'</style></head><body>'+
@@ -4448,10 +4448,10 @@ function pdfProveedores(){
       '<td>'+(p.tel||'—')+'</td><td>'+(p.email||'—')+'</td><td>'+(p.condiciones||'—')+'</td></tr>';
   });
   var css='*{box-sizing:border-box;margin:0;padding:0}body{font-family:Segoe UI,Arial,sans-serif;padding:24px;font-size:12px}'+
-    'h1{font-size:16px;color:#B71C1C;margin-bottom:4px}p{color:#666;font-size:11px;margin-bottom:16px}'+
-    'table{width:100%;border-collapse:collapse}th{background:#B71C1C;color:#fff;padding:7px 10px;font-size:10px;text-align:left}'+
+    'h1{font-size:16px;color:#256282;margin-bottom:4px}p{color:#666;font-size:11px;margin-bottom:16px}'+
+    'table{width:100%;border-collapse:collapse}th{background:#256282;color:#fff;padding:7px 10px;font-size:10px;text-align:left}'+
     'td{padding:6px 10px;border-bottom:1px solid #eee}'+
-    '.btn{position:fixed;top:12px;right:12px;background:#B71C1C;color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer}'+
+    '.btn{position:fixed;top:12px;right:12px;background:#256282;color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer}'+
     '@media print{.btn{display:none}}';
   var w=window.open('','_blank');
   w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Proveedores</title><style>'+css+'</style></head><body>'+
@@ -4669,16 +4669,16 @@ function pdfGestion(id){
   }).join(''):'<tr><td colspan="3" style="color:#999;font-style:italic">Sin pagos de saldo registrados</td></tr>';
 
   var css='*{box-sizing:border-box;margin:0;padding:0}body{font-family:Segoe UI,Arial,sans-serif;padding:24px;font-size:12px}'+
-    'h1{font-size:16px;color:#B71C1C;margin-bottom:2px}h2{font-size:13px;font-weight:600;color:#444;margin:16px 0 8px}'+
+    'h1{font-size:16px;color:#256282;margin-bottom:2px}h2{font-size:13px;font-weight:600;color:#444;margin:16px 0 8px}'+
     '.meta{font-size:11px;color:#666;margin-bottom:16px}'+
     '.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}'+
     '.box{background:#f8f8f8;border-radius:6px;padding:9px 12px}'+
     '.box .l{font-size:9px;text-transform:uppercase;color:#999;font-weight:700;margin-bottom:2px}'+
     '.box .v{font-size:14px;font-weight:700}'+
-    'table{width:100%;border-collapse:collapse}th{background:#B71C1C;color:#fff;padding:6px 10px;font-size:10px;text-align:left}'+
+    'table{width:100%;border-collapse:collapse}th{background:#256282;color:#fff;padding:6px 10px;font-size:10px;text-align:left}'+
     'td{padding:6px 10px;border-bottom:1px solid #eee;font-size:11px}'+
-    '.total{background:#B71C1C;color:#fff;padding:10px 16px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;margin-top:16px}'+
-    '.btn{position:fixed;top:12px;right:12px;background:#B71C1C;color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer}'+
+    '.total{background:#256282;color:#fff;padding:10px 16px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;margin-top:16px}'+
+    '.btn{position:fixed;top:12px;right:12px;background:#256282;color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer}'+
     '@media print{.btn{display:none}}';
 
   var w=window.open('','_blank');
@@ -4812,19 +4812,19 @@ function pdfRecibo(fondoId){
     '.page{width:210mm;background:#fff;display:grid;grid-template-rows:repeat(3,99mm)}'+
     '.recibo{padding:16px 20px;border-bottom:2px dashed #bbb;position:relative;display:flex;flex-direction:column;justify-content:space-between;height:99mm;overflow:hidden}'+
     '.recibo:last-child{border-bottom:none}'+
-    '.header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #B71C1C;padding-bottom:5px;margin-bottom:7px}'+
-    '.empresa{font-size:17px;font-weight:700;color:#B71C1C}'+
+    '.header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #256282;padding-bottom:5px;margin-bottom:7px}'+
+    '.empresa{font-size:17px;font-weight:700;color:#256282}'+
     '.empresa-sub{font-size:12px;color:#666;margin-top:2px}'+
     '.rec-num .label{font-size:12px;color:#666;text-transform:uppercase;text-align:right}'+
     '.rec-num .num{font-size:18px;font-weight:700;font-family:monospace;color:#111}'+
-    '.concepto-box{background:#B71C1C;color:#fff;text-align:center;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:5px 0;margin-bottom:8px;border-radius:0;margin-left:-20px;margin-right:-20px;padding-left:20px;padding-right:20px}'+
+    '.concepto-box{background:#256282;color:#fff;text-align:center;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:5px 0;margin-bottom:8px;border-radius:0;margin-left:-20px;margin-right:-20px;padding-left:20px;padding-right:20px}'+
     '.datos{display:grid;grid-template-columns:100px 1fr;gap:4px 10px;font-size:13px;margin-bottom:8px}'+
     '.datos .l{color:#666;font-weight:700;text-transform:uppercase}'+
     '.datos .v{color:#111}'+
     '.datos .v.bold{font-weight:700;color:#000}'+
     '.monto-box{background:#f8f8f8;border:1px solid #ddd;border-radius:3px;padding:6px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}'+
     '.monto-label{font-size:12px;color:#666;text-transform:uppercase;font-weight:700}'+
-    '.monto-valor{font-size:24px;font-weight:700;color:#B71C1C}'+
+    '.monto-valor{font-size:24px;font-weight:700;color:#256282}'+
     '.monto-usd{font-size:12px;color:#999;text-align:right}'+
     '.footer{display:flex;justify-content:space-between;align-items:flex-end}'+
     '.firma-area{width:220px}'+
@@ -4834,7 +4834,7 @@ function pdfRecibo(fondoId){
     '.fecha-label{font-size:11px;color:#666;text-transform:uppercase;font-weight:700}'+
     '.fecha-val{font-size:13px;font-weight:700;color:#333}'+
     '.cut{display:block;width:100%;border:none;border-top:2px dashed #bbb;margin:0}'+
-    '.btn{position:fixed;top:12px;right:12px;background:#B71C1C;color:#fff;border:none;padding:7px 16px;border-radius:5px;cursor:pointer;font-size:12px}'+
+    '.btn{position:fixed;top:12px;right:12px;background:#256282;color:#fff;border:none;padding:7px 16px;border-radius:5px;cursor:pointer;font-size:12px}'+
     '@media print{.btn{display:none}@page{size:A4 portrait;margin:0}}';
 
   var w = window.open('','_blank');
@@ -5052,14 +5052,14 @@ function pdfFondos(){
   }).join('');
 
   var css='*{box-sizing:border-box;margin:0;padding:0}body{font-family:Segoe UI,Arial,sans-serif;padding:24px;font-size:11px}'+
-    'h1{font-size:15px;color:#B71C1C;margin-bottom:2px}.meta{color:#666;font-size:10px;margin-bottom:14px}'+
+    'h1{font-size:15px;color:#256282;margin-bottom:2px}.meta{color:#666;font-size:10px;margin-bottom:14px}'+
     '.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}'+
     '.stat{background:#f5f5f5;border-radius:5px;padding:9px;text-align:center}'+
     '.stat .n{font-size:14px;font-weight:700;margin-bottom:2px}.stat .l{font-size:9px;color:#888;text-transform:uppercase}'+
-    'table{width:100%;border-collapse:collapse}th{background:#B71C1C;color:#fff;padding:6px 9px;font-size:10px;text-align:left}'+
+    'table{width:100%;border-collapse:collapse}th{background:#256282;color:#fff;padding:6px 9px;font-size:10px;text-align:left}'+
     'td{padding:5px 9px;border-bottom:1px solid #eee}'+
     'tfoot td{background:#222;color:#fff;font-weight:700;padding:7px 9px}'+
-    '.btn{position:fixed;top:12px;right:12px;background:#B71C1C;color:#fff;border:none;padding:6px 14px;border-radius:5px;cursor:pointer}'+
+    '.btn{position:fixed;top:12px;right:12px;background:#256282;color:#fff;border:none;padding:6px 14px;border-radius:5px;cursor:pointer}'+
     '@media print{.btn{display:none}}';
 
   var w=window.open('','_blank');
@@ -5179,15 +5179,15 @@ function reporteStockPrecios(){
   var margen=totalCosto>0?((totalVenta-totalCosto)/totalCosto*100).toFixed(1):0;
 
   var css='*{box-sizing:border-box;margin:0;padding:0}body{font-family:Segoe UI,Arial,sans-serif;padding:20px;font-size:11px}'+
-    'h1{font-size:15px;color:#B71C1C;margin-bottom:2px}.meta{color:#666;font-size:10px;margin-bottom:12px}'+
+    'h1{font-size:15px;color:#256282;margin-bottom:2px}.meta{color:#666;font-size:10px;margin-bottom:12px}'+
     '.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}'+
     '.stat{background:#f5f5f5;border-radius:5px;padding:9px;text-align:center}'+
     '.stat .n{font-size:13px;font-weight:700;margin-bottom:2px}.stat .l{font-size:9px;color:#888;text-transform:uppercase}'+
     'table{width:100%;border-collapse:collapse}'+
-    'th{background:#B71C1C;color:#fff;padding:6px 8px;font-size:9px;text-align:left}'+
+    'th{background:#256282;color:#fff;padding:6px 8px;font-size:9px;text-align:left}'+
     'td{padding:5px 8px;border-bottom:1px solid #eee}'+
     'tfoot td{background:#222;color:#fff;font-weight:700;padding:7px 8px}'+
-    '.btn{position:fixed;top:12px;right:12px;background:#B71C1C;color:#fff;border:none;padding:6px 14px;border-radius:5px;cursor:pointer}'+
+    '.btn{position:fixed;top:12px;right:12px;background:#256282;color:#fff;border:none;padding:6px 14px;border-radius:5px;cursor:pointer}'+
     '@media print{.btn{display:none}@page{margin:10mm}}';
 
   var w=window.open('','_blank');
@@ -5197,7 +5197,7 @@ function reporteStockPrecios(){
     '<div class="meta">'+empresa+' · '+today()+(tc>1?' · TC U$S: $'+tc:'')+'</div>'+
     '<div class="stats">'+
       '<div class="stat"><div class="n">'+list.length+'</div><div class="l">Componentes</div></div>'+
-      '<div class="stat"><div class="n" style="color:#B71C1C">$'+Math.round(totalCosto).toLocaleString('es-AR')+'</div><div class="l">Valor a costo</div></div>'+
+      '<div class="stat"><div class="n" style="color:#256282">$'+Math.round(totalCosto).toLocaleString('es-AR')+'</div><div class="l">Valor a costo</div></div>'+
       '<div class="stat"><div class="n" style="color:green">$'+Math.round(totalVenta).toLocaleString('es-AR')+'</div><div class="l">Valor a venta</div></div>'+
       '<div class="stat"><div class="n">'+margen+'%</div><div class="l">Margen promedio</div></div>'+
     '</div>'+
@@ -5307,27 +5307,27 @@ function generarPDFActa(cid){
 
   var css = '*{box-sizing:border-box;margin:0;padding:0}'+
     'body{font-family:Segoe UI,Arial,sans-serif;padding:0;font-size:12px;color:#222}'+
-    '.header{background:#111;color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between}'+
+    '.header{background:#0D1B24;color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between}'+
     '.header h1{font-size:16px;font-weight:700;color:#fff}'+
     '.header .sub{font-size:10px;color:#aaa;margin-top:2px}'+
-    '.acta-num{font-size:20px;font-weight:700;color:#B71C1C;text-align:right}'+
+    '.acta-num{font-size:20px;font-weight:700;color:#256282;text-align:right}'+
     '.body{padding:20px 24px}'+
     '.section{margin-bottom:18px}'+
-    '.section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#B71C1C;border-bottom:2px solid #B71C1C;padding-bottom:3px;margin-bottom:10px}'+
+    '.section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#256282;border-bottom:2px solid #256282;padding-bottom:3px;margin-bottom:10px}'+
     '.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}'+
     '.field{background:#f8f8f8;border-radius:4px;padding:6px 10px}'+
     '.field .l{font-size:9px;color:#999;font-weight:700;text-transform:uppercase;margin-bottom:1px}'+
     '.field .v{font-size:12px;font-weight:500}'+
     'table{width:100%;border-collapse:collapse;margin-top:4px}'+
-    'th{background:#B71C1C;color:#fff;padding:6px 10px;font-size:10px;text-align:left;font-weight:700}'+
+    'th{background:#256282;color:#fff;padding:6px 10px;font-size:10px;text-align:left;font-weight:700}'+
     'td{padding:6px 10px;border-bottom:1px solid #eee;font-size:11px}'+
     '.declaracion{background:#FFF8E1;border:1px solid #FFD54F;border-radius:5px;padding:12px 14px;font-size:11px;line-height:1.6;margin-bottom:18px}'+
     '.firmas{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:10px}'+
     '.firma-box{border-top:2px solid #222;padding-top:8px}'+
     '.firma-label{font-size:10px;color:#666;margin-bottom:4px;font-weight:700;text-transform:uppercase}'+
     '.firma-line{font-size:11px;color:#444;margin-bottom:3px}'+
-    '.footer{background:#f5f5f5;border-top:3px solid #B71C1C;padding:10px 24px;font-size:9px;color:#888;display:flex;justify-content:space-between}'+
-    '.btn{position:fixed;top:12px;right:12px;background:#B71C1C;color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-size:11px}'+
+    '.footer{background:#f5f5f5;border-top:3px solid #256282;padding:10px 24px;font-size:9px;color:#888;display:flex;justify-content:space-between}'+
+    '.btn{position:fixed;top:12px;right:12px;background:#256282;color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-size:11px}'+
     '@media print{.btn{display:none}@page{margin:0}}';
 
   var body =
@@ -7361,7 +7361,7 @@ function abrirEditorPres(id){
   }
 
   function sec(titulo,filas){
-    return '<tr style="background:#1a1a1a"><td colspan="4" style="padding:7px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#fff">'+titulo+'</td></tr>'+filas;
+    return '<tr style="background:#0D1B24"><td colspan="4" style="padding:7px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#fff">'+titulo+'</td></tr>'+filas;
   }
 
   const sub=calcSubtotales(p);
@@ -7436,7 +7436,7 @@ function abrirEditorPres(id){
             '<input type="number" min="0" value="'+(p.descuento||0)+'" '+
             'style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;width:100%" '+
             "onfocus=\"this.select()\" oninput=\"updPres("+id+",'descuento',this.value)\"></div>"+
-          '<div style="background:#111;color:#fff;border-radius:var(--r);padding:10px;text-align:center">'+
+          '<div style="background:#0D1B24;color:#fff;border-radius:var(--r);padding:10px;text-align:center">'+
             '<div style="font-size:9px;color:#aaa;text-transform:uppercase;margin-bottom:3px">Total final</div>'+
             '<div id="pres-total-final" style="font-size:17px;font-weight:700">'+formatMonto(totalFinal,p.moneda)+'</div>'+
           '</div>'+
