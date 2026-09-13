@@ -212,7 +212,10 @@ function ini(n){ return n.split(/[,\s]+/).filter(Boolean).map(w=>w[0]).join('').
 const AVC=['background:#E3F2FD;color:#0D47A1','background:#E8F5E9;color:#1B5E20','background:#FFF8E1;color:#7B4F00','background:#FCE4EC;color:#880E4F','background:#E8EAF6;color:#283593','background:#E0F2F1;color:#004D40'];
 function avC(n){ let h=0; for(let c of n) h=(h+c.charCodeAt(0))%AVC.length; return AVC[h]; }
 function mPill(m){ const mp={AquaOne:'p-x',AquaDuo:'p-a',AquaTrio:'p-b',AquaPro:'p-g',AquaMax:'p-r'}; return `<span class="pill ${mp[m]||'p-x'}">${m}</span>`; }
-function ePill(e){ return `<span class="pill ${e==='Activo'?'p-g':'p-r'}">${e}</span>`; }
+function ePill(e){ return `<span class="pill ${e==='Activo'?'p-g':(e==='Potencial'?'p-a':'p-r')}">${e}</span>`; }
+function potencialLockMsg(){
+  return '<div class="empty">🔒 Este cliente es <b>Potencial</b> todavía — esta sección se habilita cuando se aprueba un presupuesto y pasa a estado Activo.</div>';
+}
 function tPill(t){ const tp={Puerta:'p-b',Ventana:'p-x','Movimiento PIR':'p-a',Botón:'p-g',Humo:'p-r',Vibración:'p-p'}; return `<span class="pill ${tp[t]||'p-x'}">${t}</span>`; }
 function metPill(m){ const mp={OTA:'p-b',Serial:'p-a',Manual:'p-x'}; return `<span class="pill ${mp[m]||'p-x'}">${m}</span>`; }
 function resPill(r){ const rp={Exitoso:'p-g',Fallido:'p-r',Parcial:'p-a'}; return `<span class="pill ${rp[r]||'p-x'}">${r}</span>`; }
@@ -234,6 +237,7 @@ function today(){
 function renderStats(){
   const c=DB.clientes;
   const act=c.filter(x=>x.estado==='Activo').length;
+  const pot=c.filter(x=>x.estado==='Potencial').length;
   const baj=c.filter(x=>x.estado==='Baja').length;
   const one=c.filter(x=>x.estado==='Activo'&&x.modelo==='AquaOne').length;
   const duo=c.filter(x=>x.estado==='Activo'&&x.modelo==='AquaDuo').length;
@@ -242,6 +246,7 @@ function renderStats(){
   const max=c.filter(x=>x.estado==='Activo'&&x.modelo==='AquaMax').length;
   document.getElementById('stats-box').innerHTML=`
     <div class="stat"><div class="stat-n green">${act}</div><div class="stat-l">Activos</div></div>
+    <div class="stat"><div class="stat-n amber">${pot}</div><div class="stat-l">Potenciales</div></div>
     <div class="stat"><div class="stat-n red">${baj}</div><div class="stat-l">Bajas</div></div>
     <div class="stat"><div class="stat-n">${one}</div><div class="stat-l">AquaOne</div></div>
     <div class="stat"><div class="stat-n amber">${duo}</div><div class="stat-l">AquaDuo</div></div>
@@ -275,6 +280,8 @@ function renderClientes(){
       <button class="btn btn-sm" onclick="verCliente(${c.id})">👁️ Ver</button>
       ${c.estado==='Activo'
         ?`<button class="btn btn-sm" style="color:var(--red)" onclick="darBaja(${c.id})">🚫 Baja</button><button class="btn btn-sm" style="color:var(--red);margin-left:3px" onclick="borrarCliente(${c.id})">🗑️</button>`
+        :c.estado==='Potencial'
+        ?`<button class="btn btn-sm" style="color:var(--red)" onclick="borrarCliente(${c.id})">🗑️ Descartar</button>`
         :`<button class="btn btn-sm" style="color:var(--green)" onclick="reactivar(${c.id})">✅ Activar</button>`}
     </td>
   </tr>`).join('');
@@ -320,14 +327,17 @@ function reactivar(id){
 function limpiarAlta(){
   ['an','al','aba','at','av','amac','apin','achat','aemail','aambientes'].forEach(id=>{ const e=document.getElementById(id); if(e) e.value=''; });
   const af=document.getElementById('af'); if(af) af.value=today();
+  window._promoveClienteId = null;
 }
 function guardarCliente(){
   const n=document.getElementById('an').value.trim();
   const l=document.getElementById('al').value.trim();
   const t=document.getElementById('at').value.trim();
   if(!n||!t){alert('Nombre y teléfono son obligatorios.');return;}
-  // Check for duplicate client
+  // Check for duplicate client (excepto si es el propio cliente potencial que estamos promoviendo)
+  var promoveIdCheck = window._promoveClienteId||null;
   var duplicado = DB.clientes.find(function(c){
+    if(promoveIdCheck && c.id===promoveIdCheck) return false;
     return c.nombre.toLowerCase()===n.toLowerCase() ||
            (t && c.tel && c.tel.replace(/\s/g,'')===t.replace(/\s/g,''));
   });
@@ -380,17 +390,34 @@ function guardarCliente(){
     equipo:{esp_serie:'',proveedor:'',fcompra:'',bat_marca:'',bat_modelo:'',carg_marca:'',carg_modelo:'',fuente_marca:'',fuente_modelo:'',fuente_tension:'',sirena_marca:'',sirena_modelo:'',sirena_serie:'',sirena_corte:'No',garantia:'No',gar_vence:'',ultimo_service:''},
     zigbee:zigbeeFromRel,ota:[],mant:[]
   };
-  DB.clientes.unshift(nuevoCliente);
+
+  // Si venimos de un cliente potencial, promovemos ESE registro (mismo id, mismo historial)
+  // en vez de crear uno nuevo.
+  var promoveId = window._promoveClienteId||null;
+  var potencial = promoveId ? DB.clientes.find(function(c){return c.id===promoveId;}) : null;
+  if(potencial){
+    potencial.nombre=nuevoCliente.nombre; potencial.lote=nuevoCliente.lote; potencial.barrio=nuevoCliente.barrio;
+    potencial.tel=nuevoCliente.tel; potencial.modelo=nuevoCliente.modelo; potencial.version=nuevoCliente.version;
+    potencial.fecha=nuevoCliente.fecha; potencial.mac=nuevoCliente.mac; potencial.pin=nuevoCliente.pin;
+    potencial.chatid=nuevoCliente.chatid; potencial.email=nuevoCliente.email; potencial.ambientes=nuevoCliente.ambientes;
+    potencial.dir=nuevoCliente.dir||potencial.dir; potencial.estado='Activo'; potencial.estadoInstalacion='Programado';
+    potencial.presId=presIdLink;
+    if(zigbeeFromRel.length) potencial.zigbee=zigbeeFromRel;
+  } else {
+    DB.clientes.unshift(nuevoCliente);
+  }
+  var clienteFinalId = potencial ? potencial.id : nuevoCliente.id;
 
   // Link presupuesto to cliente
   if(presIdLink){
     var pres = DB.presupuestos.find(function(p){return p.id===presIdLink;});
-    if(pres){ pres.estado='Aprobado'; pres.clienteId=nuevoCliente.id; }
+    if(pres){ pres.estado='Aprobado'; pres.clienteId=clienteFinalId; }
   }
 
   window._convSensores = null;
   window._convPresId = null;
   window._convDir = null;
+  window._promoveClienteId = null;
 
   save();
 
@@ -410,6 +437,8 @@ function verCliente(id){
     <button class="btn btn-sm" onclick="goTo('clientes')">← Volver</button>
     ${c.estado==='Activo'
       ?`<button class="btn btn-sm btn-d" onclick="darBaja(${c.id});verCliente(${c.id})">🚫 Dar de baja</button><button class="btn btn-sm" style="background:#7F0000;color:#fff;margin-left:6px" onclick="borrarCliente(${c.id})">🗑️ Eliminar cliente</button>`
+      :c.estado==='Potencial'
+      ?`<button class="btn btn-sm" style="background:#7F0000;color:#fff" onclick="borrarCliente(${c.id})">🗑️ Descartar potencial</button>`
       :`<button class="btn btn-sm btn-g" onclick="reactivar(${c.id});verCliente(${c.id})">✅ Reactivar</button>`}`;
   document.getElementById('det-head').innerHTML=`
     <div style="display:flex;align-items:center;gap:10px;padding:10px 0">
@@ -505,7 +534,9 @@ function editarDatos(){
 // SUB: EQUIPAMIENTO
 // =======================================================
 function renderEquipo(){
-  const e=gc().equipo;
+  const c=gc();
+  if(c.estado==='Potencial'){document.getElementById('cont-equipo').innerHTML=potencialLockMsg();return;}
+  const e=c.equipo;
   document.getElementById('cont-equipo').innerHTML=`
     <div class="sectitle">Procesador / Central</div>
     <div class="fgrid">${fbox('N° serie',e.esp_serie,true)}${fbox('Proveedor',e.proveedor)}${fbox('Fecha de compra',e.fcompra)}</div>
@@ -598,6 +629,7 @@ function editarEquipo(){
 // =======================================================
 function renderZigbee(){
   const c=gc();
+  if(c.estado==='Potencial'){document.getElementById('cont-zigbee').innerHTML=potencialLockMsg();return;}
   if(!c.zigbee.length){document.getElementById('cont-zigbee').innerHTML='<div class="empty">📡 Sin sensores registrados. Usá "Agregar sensor" para registrar el primero.</div>';return;}
   document.getElementById('cont-zigbee').innerHTML=`<table>
     <colgroup><col style="width:8%"><col style="width:11%"><col style="width:9%"><col style="width:9%"><col style="width:12%"><col style="width:11%"><col style="width:10%"><col style="width:10%"><col style="width:11%"><col style="width:9%"></colgroup>
@@ -692,6 +724,7 @@ function modalOTA(idx){
 // =======================================================
 function renderMant(){
   const c=gc();
+  if(c.estado==='Potencial'){document.getElementById('mant-stats').innerHTML='';document.getElementById('cont-mant').innerHTML=potencialLockMsg();return;}
   const tot=c.mant.length,gar=c.mant.filter(x=>x.garantia==='Sí').length,costo=c.mant.reduce((a,x)=>a+(parseFloat(x.costo)||0),0);
   document.getElementById('mant-stats').innerHTML=`<div class="stats stats-3">
     <div class="stat"><div class="stat-n">${tot}</div><div class="stat-l">Visitas totales</div></div>
@@ -1665,6 +1698,10 @@ function convertirCliente(id){
   if(!p)return;
   if(!confirm('¿Convertir el presupuesto de "'+p.nombre+'" en cliente?'))return;
   cerrarModal();
+  // Si el presupuesto viene de un cliente potencial, promovemos ESE mismo registro
+  // (se completa y pasa a Activo) en vez de crear uno nuevo desde cero.
+  var potencial = p.clientePotencialId ? DB.clientes.find(function(c){return c.id===p.clientePotencialId;}) : null;
+  window._promoveClienteId = potencial ? potencial.id : null;
   // Store data to load after navigation
   window._convData = p;
   goTo('alta');
@@ -1673,10 +1710,10 @@ function convertirCliente(id){
     if(!d) return;
     var f=function(eid,val){var el=document.getElementById(eid);if(el)el.value=val||'';};
     f('an', d.nombre);
-    f('al', d.lote||'');
-    f('aba', d.barrio||'');
+    f('al', (potencial&&potencial.lote)||d.lote||'');
+    f('aba', d.barrio||(potencial&&potencial.barrio)||'');
     f('at', d.tel);
-    f('aemail', d.email||'');
+    f('aemail', d.email||(potencial&&potencial.email)||'');
     f('aambientes', d.ambientes||'');
     f('af', today());
     f('av', '');
@@ -1690,7 +1727,9 @@ function convertirCliente(id){
     window._convPresId = d.id;
     window._convDir = d.dir||'';
     window._convData = null;
-    alert('Datos cargados desde presupuesto. Completá lote, MAC, PIN y versión. Los sensores del relevamiento se importarán automáticamente.');
+    alert(potencial
+      ? 'Datos cargados desde el cliente potencial "'+potencial.nombre+'". Completá lote, MAC, PIN y versión para activarlo.'
+      : 'Datos cargados desde presupuesto. Completá lote, MAC, PIN y versión. Los sensores del relevamiento se importarán automáticamente.');
   }, 300);
 }
 
@@ -5232,6 +5271,7 @@ function renderActa(){
   const c = gc();
   const el = document.getElementById('cont-acta');
   if(!el) return;
+  if(c.estado==='Potencial'){el.innerHTML=potencialLockMsg();return;}
   const numActa = 'ACR-'+new Date().getFullYear()+'-'+String(c.id).padStart(4,'0');
   
   el.innerHTML =
@@ -7462,11 +7502,14 @@ function abrirEditorPres(id){
     '</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'+
       '<div class="fg full" style="margin:0;grid-column:1/-1"><label>Cliente existente (opcional)</label>'+
-        '<select style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;width:100%" onchange="cargarClienteEnPresupuesto('+id+',this.value)">'+
+        '<div style="display:flex;gap:8px;align-items:flex-start">'+
+        '<select style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;flex:1" onchange="cargarClienteEnPresupuesto('+id+',this.value)">'+
           '<option value="">-- nuevo / escribir a mano --</option>'+
-          DB.clientes.slice().sort(function(a,b){return a.nombre.localeCompare(b.nombre,'es');}).map(function(c){return '<option value="'+c.id+'">'+c.nombre+(c.barrio?' — '+c.barrio:'')+'</option>';}).join('')+
+          DB.clientes.slice().sort(function(a,b){return a.nombre.localeCompare(b.nombre,'es');}).map(function(c){return '<option value="'+c.id+'"'+(p.clientePotencialId===c.id?' selected':'')+'>'+c.nombre+(c.barrio?' — '+c.barrio:'')+(c.estado==='Potencial'?' (potencial)':'')+'</option>';}).join('')+
         '</select>'+
-        '<div style="font-size:11px;color:var(--text2);margin-top:4px">Elegir uno completa nombre, teléfono, email, dirección y barrio abajo — se pueden seguir editando después.</div>'+
+        '<button type="button" class="btn btn-sm" onclick="nuevoClientePotencial('+id+')" style="white-space:nowrap">➕ Cliente potencial</button>'+
+        '</div>'+
+        '<div style="font-size:11px;color:var(--text2);margin-top:4px">Elegir uno completa nombre, teléfono, email, dirección y barrio abajo — se pueden seguir editando después. "Cliente potencial" crea uno nuevo con estado Potencial, sin datos de instalación.</div>'+
       '</div>'+
       inp('Nombre cliente *','nombre',p.nombre)+
       inp('Telefono','tel',p.tel)+
@@ -7532,8 +7575,49 @@ function cargarClienteEnPresupuesto(id, clienteId){
   p.email=c.email||'';
   p.dir=c.lote||'';
   p.barrio=c.barrio||'';
+  p.clientePotencialId = (c.estado==='Potencial') ? c.id : null;
   save();
   abrirEditorPres(id);
+}
+
+// Crea un cliente potencial desde el propio formulario de presupuesto: datos básicos
+// nada más (sin modelo, MAC, PIN, etc. — eso queda para cuando se apruebe y pase a Activo).
+function nuevoClientePotencial(presupuestoId){
+  openModal('➕ Cliente potencial',
+    '<div class="fg2">'+
+      '<div class="fg full"><label>Nombre *</label><input id="cp-nombre" type="text" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;width:100%"></div>'+
+      '<div class="fg"><label>Teléfono</label><input id="cp-tel" type="text" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;width:100%"></div>'+
+      '<div class="fg"><label>Email</label><input id="cp-email" type="email" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;width:100%"></div>'+
+      '<div class="fg"><label>Dirección / Lote</label><input id="cp-dir" type="text" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;width:100%"></div>'+
+      '<div class="fg"><label>Barrio</label><input id="cp-barrio" type="text" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;width:100%"></div>'+
+    '</div>'+
+    '<div style="font-size:11px;color:var(--text2);margin-top:6px">Queda guardado como <b>Potencial</b> — solo sirve para este presupuesto o para lista de correo, hasta que se apruebe y pase a Activo.</div>',
+    function(){
+      var nombre=document.getElementById('cp-nombre').value.trim();
+      if(!nombre){ alert('El nombre es obligatorio.'); return false; }
+      var nuevo={
+        id:DB.nid++, nombre:nombre,
+        tel:document.getElementById('cp-tel').value.trim(),
+        email:document.getElementById('cp-email').value.trim(),
+        lote:document.getElementById('cp-dir').value.trim(),
+        barrio:document.getElementById('cp-barrio').value.trim(),
+        modelo:'', version:'', fecha:'', mac:'', pin:'', chatid:'', ambientes:'',
+        dir:'', estado:'Potencial', estadoInstalacion:'', presId:presupuestoId,
+        equipo:{esp_serie:'',proveedor:'',fcompra:'',ups_marca:'',ups_modelo:'',ups_tension:'',ups_garantia:'No',ups_gar_vence:'',ups_ultimo_service:'',sirena_marca:'',sirena_modelo:'',sirena_serie:''},
+        zigbee:[], ota:[], mant:[]
+      };
+      DB.clientes.unshift(nuevo);
+      var p=DB.presupuestos.find(function(x){return x.id===presupuestoId;});
+      if(p){
+        p.nombre=nuevo.nombre; p.tel=nuevo.tel; p.email=nuevo.email;
+        p.dir=nuevo.lote; p.barrio=nuevo.barrio;
+        p.clientePotencialId=nuevo.id;
+      }
+      save();
+      abrirEditorPres(presupuestoId);
+      return false; // ya manejamos la vuelta al editor de presupuesto nosotros mismos
+    }
+  );
 }
 
 function nuevoPresupuesto(){
