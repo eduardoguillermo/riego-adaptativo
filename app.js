@@ -127,6 +127,12 @@ function stockActual(cid){
 }
 function invalidarStockCache(){ _stockCache=null; }
 
+// Busca un componente por id sin asumir el tipo — los creados desde el escáner de
+// código de barras (celular) tienen id de texto, los creados en la PC tienen id numérico.
+function findComponente(idRaw){
+  return DB.componentes.find(function(c){ return String(c.id)===String(idRaw); });
+}
+
 function save(){
   invalidarStockCache();
   localStorage.setItem(SKEY,JSON.stringify(DB));
@@ -909,10 +915,10 @@ function agregarMatMant(){
       '<div class="fg"><label>Cantidad</label><input id="am-cant" type="number" min="1" value="1"></div>'+
     '</div>',
     function(){
-      var compId=parseInt(document.getElementById('am-comp').value)||0;
+      var compId=document.getElementById('am-comp').value;
       var cant=parseFloat(document.getElementById('am-cant').value)||0;
       if(!compId||!cant){alert('Seleccioná un componente.');return false;}
-      var comp=DB.componentes.find(function(c){return c.id===compId;})||{};
+      var comp=findComponente(compId)||{};
       if(!window._mantMateriales) window._mantMateriales=[];
       window._mantMateriales.push({compId:compId,desc:comp.desc||'',codigo:comp.codigo||'',cant:cant,costo:comp.costo||0});
       // Refresh the list
@@ -2246,9 +2252,9 @@ function renderCatalogo(){
       '<td>'+(c.proveedor||'—')+'</td>'+
       '<td style="text-align:center">'+(c.estadoMat==='R'?'<span class="pill p-a" title="Recuperado">R</span>':'<span class="pill p-g" title="Nuevo">N</span>')+'</td>'+
       '<td style="display:flex;gap:3px">'+
-        '<button class="btn btn-sm" onclick="modalComponente('+c.id+')" title="Editar">✏️</button>'+
-        '<button class="btn btn-sm" onclick="duplicarComponente('+c.id+')" title="Duplicar">📋</button>'+
-        '<button class="btn btn-sm" style="color:var(--red)" onclick="eliminarComponente('+c.id+')" title="Eliminar">🗑️</button>'+
+        '<button class="btn btn-sm" onclick="modalComponente(\''+c.id+'\')" title="Editar">✏️</button>'+
+        '<button class="btn btn-sm" onclick="duplicarComponente(\''+c.id+'\')" title="Duplicar">📋</button>'+
+        '<button class="btn btn-sm" style="color:var(--red)" onclick="eliminarComponente(\''+c.id+'\')" title="Eliminar">🗑️</button>'+
       '</td>'+
     '</tr>';
   }).join('');
@@ -2269,7 +2275,7 @@ function sortCatalogo(col){
 }
 
 function duplicarComponente(id){
-  var c=DB.componentes.find(function(x){return x.id===id;});
+  var c=findComponente(id);
   if(!c) return;
   var nuevo=Object.assign({},c,{id:DB.nid++,codigo:c.codigo+'-2',desc:'Copia de '+c.desc});
   DB.componentes.push(nuevo);
@@ -2360,7 +2366,7 @@ function calcPreciosVentaCompUSD(){
 }
 
 function modalComponente(id){
-  const c=id>=0?DB.componentes.find(function(x){return x.id===id;}):null;
+  const c=(id!==-1&&id!==undefined&&id!==null)?findComponente(id):null;
   const cats=[...new Set(DB.componentes.map(function(x){return x.categoria;}))].filter(Boolean);
   const catOpts=cats.map(function(x){return '<option'+(c&&c.categoria===x?' selected':'')+'>'+x+'</option>';}).join('');
   openModal(c?'Editar componente':'Nuevo componente',
@@ -2455,8 +2461,8 @@ function modalComponente(id){
 
 function eliminarComponente(id){
   if(!confirm('¿Eliminar este componente? Se perderán sus movimientos.'))return;
-  DB.componentes=DB.componentes.filter(function(x){return x.id!==id;});
-  DB.movimientos=DB.movimientos.filter(function(x){return x.cid!==id;});
+  DB.componentes=DB.componentes.filter(function(x){return String(x.id)!==String(id);});
+  DB.movimientos=DB.movimientos.filter(function(x){return String(x.cid)!==String(id);});
   save();renderCatalogo();
 }
 
@@ -2486,15 +2492,15 @@ function renderMovimientos(){
     selOri.innerHTML='<option value="">Todos los orígenes</option>'+origenesUsados.map(function(ori){return '<option value="'+ori+'"'+(ori===curOri?' selected':'')+'>'+ori+'</option>';}).join('');
   }
   const list=DB.movimientos.filter(function(m){
-    const comp=DB.componentes.find(function(c){return c.id===(m.cid||m.compId);})||{desc:'—',codigo:'',unidad:''};
+    const comp=findComponente((m.cid||m.compId))||{desc:'—',codigo:'',unidad:''};
     var matchQ=!q||(comp.desc+comp.codigo+(m.ref||'')+(m.nota||'')+(m.origen||'')).toLowerCase().includes(q);
     var matchT=!ft||m.tipo===ft;
     var matchM=!fm||(m.nota||'').trim()===fm;
     var matchO=!fo||(m.origen||'').trim()===fo;
     return matchQ&&matchT&&matchM&&matchO;
   }).sort(function(a,b){
-    var ca=DB.componentes.find(function(c){return c.id===(a.cid||a.compId);})||{};
-    var cb=DB.componentes.find(function(c){return c.id===(b.cid||b.compId);})||{};
+    var ca=findComponente((a.cid||a.compId))||{};
+    var cb=findComponente((b.cid||b.compId))||{};
     var sa=(ca.codigo||'').toLowerCase(); var sb=(cb.codigo||'').toLowerCase();
     if(sa!==sb) return sa.localeCompare(sb);
     return b.fecha.localeCompare(a.fecha);
@@ -2504,7 +2510,7 @@ function renderMovimientos(){
   if(!list.length){tb.innerHTML='<tr><td colspan="11" class="empty">Sin movimientos registrados.</td></tr>';return;}
   const tc=(DB.config&&DB.config.tipoCambio)||1;
   tb.innerHTML=list.map(function(m){
-    const comp=DB.componentes.find(function(c){return c.id===(m.cid||m.compId);})||{desc:'—',codigo:'—',unidad:''};
+    const comp=findComponente((m.cid||m.compId))||{desc:'—',codigo:'—',unidad:''};
     const cli=m.clienteId?DB.clientes.find(function(c){return c.id===m.clienteId;}):null;
     const precioUSD=m.precio&&tc>0?'U$S '+(parseFloat(m.precio)/tc).toFixed(2):'—';
     var eMat=m.estadoMat==='R'?'<span class="pill p-a" title="Recuperado">R</span>':'<span class="pill p-g" title="Nuevo">N</span>';
@@ -2520,8 +2526,8 @@ function renderMovimientos(){
       '<td>'+(m.ref||'—')+'</td>'+
       '<td>'+(cli?cli.nombre:(m.nota||'—'))+'</td>'+
       '<td style="font-size:11px">'+(m.origen||'—')+'</td>'+
-      '<td style="display:flex;gap:3px"><button class="btn btn-sm" onclick="editarMovimiento('+m.id+')">✏️</button>'+
-      '<button class="btn btn-sm" style="color:var(--red)" onclick="borrarMovimiento('+m.id+')">🗑️</button></td>'+
+      '<td style="display:flex;gap:3px"><button class="btn btn-sm" onclick="editarMovimiento(\''+m.id+'\')">✏️</button>'+
+      '<button class="btn btn-sm" style="color:var(--red)" onclick="borrarMovimiento(\''+m.id+'\')">🗑️</button></td>'+
     '</tr>';
   }).join('');
 }
@@ -2530,9 +2536,9 @@ function renderMovimientos(){
 function mostrarPrecioComp(){
   var el = document.getElementById('mv-precio-display');
   if(!el) return;
-  var cid = parseInt(document.getElementById('mv-cid').value)||0;
+  var cid = document.getElementById('mv-cid').value;
   if(!cid){ el.textContent='— seleccionar componente —'; return; }
-  var comp = DB.componentes.find(function(c){return c.id===cid;});
+  var comp = findComponente(cid);
   if(!comp){ el.textContent='—'; return; }
   var tc = parseFloat((DB.config&&DB.config.tipoCambio)||1);
   var pesos = comp.costo ? '$'+Math.round(parseFloat(comp.costo)).toLocaleString('es-AR') : '—';
@@ -2600,7 +2606,7 @@ function modalMovimiento(tipo, preselCid){
       )+
     '</div>',
     function(){
-      const cid=parseInt(document.getElementById('mv-cid').value);
+      const cid=document.getElementById('mv-cid').value;
       const cant=parseFloat(document.getElementById('mv-cant').value)||0;
       if(!cid||cant<=0){alert('Seleccioná un componente e ingresá la cantidad.');return false;}
       const mov={
@@ -2608,7 +2614,7 @@ function modalMovimiento(tipo, preselCid){
         fecha:document.getElementById('mv-fecha').value
       };
       if(tipo==='Entrada'){
-        var compCat=DB.componentes.find(function(c){return c.id===parseInt(document.getElementById('mv-cid').value);});
+        var compCat=findComponente(cid);
         mov.precio=compCat?parseFloat(compCat.costo)||0:0;
         mov.precioUSD=compCat?parseFloat(compCat.costo_usd||compCat.costoUSD)||0:0;
         mov.ref=document.getElementById('mv-ref').value;
@@ -2684,7 +2690,7 @@ function reporteEntradasPorOrigen(){
     if(fDesde && m.fecha < fDesde) return false;
     if(fHasta && m.fecha > fHasta) return false;
     if(fComp){
-      var comp = DB.componentes.find(function(c){return c.id===(m.cid||m.compId);});
+      var comp = findComponente((m.cid||m.compId));
       if(!comp || !(comp.desc+comp.codigo).toLowerCase().includes(fComp)) return false;
     }
     if(fOrigen && (m.origen||'Sin origen').trim() !== fOrigen) return false;
@@ -2696,7 +2702,7 @@ function reporteEntradasPorOrigen(){
   entradas.forEach(function(m){
     var ori = (m.origen||'Sin origen').trim() || 'Sin origen';
     if(!grupos[ori]) grupos[ori] = {movimientos:[], totalCant:0, totalValor:0};
-    var comp = DB.componentes.find(function(c){return c.id===(m.cid||m.compId);})||{};
+    var comp = findComponente((m.cid||m.compId))||{};
     var valor = (parseFloat(m.cant)||0) * (parseFloat(comp.costo||comp.precio)||0);
     grupos[ori].movimientos.push({m:m, comp:comp, valor:valor});
     grupos[ori].totalCant += parseFloat(m.cant)||0;
@@ -2738,7 +2744,7 @@ function reporteEntradasPorOrigen(){
 
   var totalMov = entradas.length;
   var totalValor = entradas.reduce(function(a,m){
-    var comp = DB.componentes.find(function(c){return c.id===(m.cid||m.compId);})||{};
+    var comp = findComponente((m.cid||m.compId))||{};
     return a + (parseFloat(m.cant)||0)*(parseFloat(comp.costo||comp.precio)||0);
   },0);
 
@@ -2827,7 +2833,7 @@ function reporteSalidasPorMotivo(){
     if(fDesde && m.fecha < fDesde) return false;
     if(fHasta && m.fecha > fHasta) return false;
     if(fComp){
-      var comp = DB.componentes.find(function(c){return c.id===(m.cid||m.compId);});
+      var comp = findComponente((m.cid||m.compId));
       if(!comp || !(comp.desc+comp.codigo).toLowerCase().includes(fComp)) return false;
     }
     if(fMotivo && (m.nota||'').trim() !== fMotivo) return false;
@@ -2839,7 +2845,7 @@ function reporteSalidasPorMotivo(){
   salidas.forEach(function(m){
     var mot = (m.nota||'Sin motivo').trim() || 'Sin motivo';
     if(!grupos[mot]) grupos[mot] = {movimientos:[], totalCant:0, totalValor:0};
-    var comp = DB.componentes.find(function(c){return c.id===(m.cid||m.compId);})||{};
+    var comp = findComponente((m.cid||m.compId))||{};
     var valor = (parseFloat(m.cant)||0) * (parseFloat(comp.costo||comp.precio)||0);
     grupos[mot].movimientos.push({m:m, comp:comp, valor:valor});
     grupos[mot].totalCant += parseFloat(m.cant)||0;
@@ -2882,7 +2888,7 @@ function reporteSalidasPorMotivo(){
   // Stats generales
   var totalMov = salidas.length;
   var totalValor = salidas.reduce(function(a,m){
-    var comp = DB.componentes.find(function(c){return c.id===(m.cid||m.compId);})||{};
+    var comp = findComponente((m.cid||m.compId))||{};
     return a + (parseFloat(m.cant)||0)*(parseFloat(comp.costo||comp.precio)||0);
   },0);
 
@@ -2947,11 +2953,11 @@ function renderOrdenes(){
   tb.innerHTML=list.map(function(o){
     const estPill={'Pendiente':'p-a',Enviada:'p-b',Recibida:'p-g',Cancelada:'p-r'};
     const items=o.items.map(function(i){
-      const c=DB.componentes.find(function(x){return x.id===i.cid;})||{desc:'?'};
+      const c=findComponente(i.cid)||{desc:'?'};
       return c.desc+' ('+i.cant+')';
     }).join(', ');
     const total=o.items.reduce(function(a,i){
-      const c=DB.componentes.find(function(x){return x.id===i.cid;})||{precio:0};
+      const c=findComponente(i.cid)||{precio:0};
       return a+(c.precio||0)*i.cant;
     },0);
     return '<tr>'+
@@ -3035,7 +3041,7 @@ function modalOrden(){
       '</select></div>'+
     '<div class="fg"><label>Observaciones</label><input id="ord-obs" placeholder="Notas..."></div>',
     function(){
-      const cids=[...document.querySelectorAll('.ord-cid')].map(function(s){return parseInt(s.value);});
+      const cids=[...document.querySelectorAll('.ord-cid')].map(function(s){return s.value;});
       const cants=[...document.querySelectorAll('.ord-cant')].map(function(i){return parseFloat(i.value)||0;});
       const items=cids.map(function(cid,i){return {cid:cid,cant:cants[i]};}).filter(function(x){return x.cid&&x.cant>0;});
       if(!items.length){alert('Agregá al menos un componente con cantidad.');return false;}
@@ -3088,19 +3094,19 @@ function cambiarEstadoOrden(id){
 }
 
 function borrarMovimiento(id){
-  var m = DB.movimientos.find(function(x){return x.id===id;});
+  var m = DB.movimientos.find(function(x){return String(x.id)===String(id);});
   if(!m) return;
-  var comp = DB.componentes.find(function(c){return c.id===(m.cid||m.compId);});
+  var comp = findComponente((m.cid||m.compId));
   var desc = comp?comp.desc:'componente';
   if(!confirm('¿Eliminar el movimiento de '+m.tipo.toLowerCase()+' de "'+desc+'" del '+m.fecha+'?')) return;
-  DB.movimientos = DB.movimientos.filter(function(x){return x.id!==id;});
+  DB.movimientos = DB.movimientos.filter(function(x){return String(x.id)!==String(id);});
   save(); renderMovimientos(); renderStock();
 }
 
 function editarMovimiento(id){
-  const m=DB.movimientos.find(function(x){return x.id===id;});
+  const m=DB.movimientos.find(function(x){return String(x.id)===String(id);});
   if(!m) return;
-  const comp=DB.componentes.find(function(c){return c.id===m.cid;})||{desc:'?'};
+  const comp=findComponente(m.cid)||{desc:'?'};
   const tc=(DB.config&&DB.config.tipoCambio)||1;
   openModal('Editar movimiento — '+comp.desc,
     '<div class="fg2">'+
@@ -3139,14 +3145,14 @@ function pdfOrden(id){
   const tc=(DB.config&&DB.config.tipoCambio)||1;
   let rows='';
   o.items.forEach(function(item){
-    const c=DB.componentes.find(function(x){return x.id===item.cid;})||{codigo:'?',desc:'?',unidad:'u',precio:0,ubicacion:''};
+    const c=findComponente(item.cid)||{codigo:'?',desc:'?',unidad:'u',precio:0,ubicacion:''};
     const sub=(c.costo||c.precio||0)*item.cant;
     rows+='<tr><td>'+c.codigo+'</td><td>'+c.desc+'</td><td style="text-align:center">'+item.cant+' '+c.unidad+'</td>'+
       '<td style="text-align:right">$'+Math.round(c.costo||c.precio||0).toLocaleString('es-AR')+'</td>'+
       '<td style="text-align:right">$'+Math.round(sub).toLocaleString('es-AR')+'</td>'+
       '<td>'+( c.ubicacion||'—')+'</td></tr>';
   });
-  const total=o.items.reduce(function(a,i){const c=DB.componentes.find(function(x){return x.id===i.cid;})||{costo:0,precio:0};return a+(c.costo||c.precio||0)*i.cant;},0);
+  const total=o.items.reduce(function(a,i){const c=findComponente(i.cid)||{costo:0,precio:0};return a+(c.costo||c.precio||0)*i.cant;},0);
   const w=window.open('','_blank');
   w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Orden #'+o.id+'</title>'+
     '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Segoe UI,Arial,sans-serif;padding:28px;font-size:13px}'+
@@ -4542,7 +4548,7 @@ function modalOrdenDesdeProveedor(provId){
     '<button class="btn btn-sm" onclick="addOrdenItemPv()" style="margin-bottom:10px">➕ Agregar ítem</button>'+
     '<div class="fg"><label>Observaciones</label><input id="ord-pv-obs" placeholder="Notas..."></div>',
     function(){
-      var cids=[...document.querySelectorAll('.ord-cid')].map(function(s){return parseInt(s.value);});
+      var cids=[...document.querySelectorAll('.ord-cid')].map(function(s){return s.value;});
       var cants=[...document.querySelectorAll('.ord-cant')].map(function(i){return parseFloat(i.value)||0;});
       var items=cids.map(function(cid,i){return {cid:cid,cant:cants[i]};}).filter(function(x){return x.cid&&x.cant>0;});
       if(!items.length){alert('Agregá al menos un componente.');return false;}
@@ -5543,7 +5549,7 @@ function reporteOCporProveedor(){
     var prov=o.proveedor||'Sin proveedor';
     if(!provMap[prov]) provMap[prov]={ordenes:[],total:0};
     var total=o.items.reduce(function(a,i){
-      var c=DB.componentes.find(function(x){return x.id===i.cid;})||{costo:0,precio:0};
+      var c=findComponente(i.cid)||{costo:0,precio:0};
       return a+(c.costo||c.precio||0)*i.cant;
     },0);
     provMap[prov].ordenes.push({numero:o.numero||'—',fecha:o.fecha,estado:o.estado,total:total});
@@ -5748,7 +5754,7 @@ function iniciarFabricacion(otId){
   kit.forEach(function(item){
     var disponible=stockActual(item.compId);
     if(disponible<item.cant){
-      var comp=DB.componentes.find(function(c){return c.id===item.compId;})||{};
+      var comp=findComponente(item.compId)||{};
       faltantes.push({nombre:comp.desc||item.compNombre,necesita:item.cant,tiene:disponible});
     }
   });
@@ -5765,7 +5771,7 @@ function iniciarFabricacion(otId){
   // Salida del stock al registro de materiales en fábrica
   f.materiales=[];
   kit.forEach(function(item){
-    var comp=DB.componentes.find(function(c){return c.id===item.compId;})||{};
+    var comp=findComponente(item.compId)||{};
     // Stock movement - salida
     DB.movimientos.push({
       id:DB.nid++,
@@ -5855,8 +5861,8 @@ function abrirOT(id){
       f.materiales.map(function(m){
         var enUso=m.cant-(m.devuelto||0);
         return '<tr style="border-bottom:1px solid var(--border)">'+
-          '<td style="padding:5px 10px;font-family:monospace;font-size:11px">'+(function(){var c=DB.componentes.find(function(x){return x.id===m.compId;});return c?c.codigo:m.compCodigo||'—';})()+'</td>'+
-          '<td style="padding:5px 10px;font-size:11px">'+(function(){var c=DB.componentes.find(function(x){return x.id===m.compId;});return c?c.desc:m.compNombre||'—';})()+'</td>'+
+          '<td style="padding:5px 10px;font-family:monospace;font-size:11px">'+(function(){var c=findComponente(m.compId);return c?c.codigo:m.compCodigo||'—';})()+'</td>'+
+          '<td style="padding:5px 10px;font-size:11px">'+(function(){var c=findComponente(m.compId);return c?c.desc:m.compNombre||'—';})()+'</td>'+
           '<td style="padding:5px 10px;text-align:center">'+m.cant+'</td>'+
           '<td style="padding:5px 10px;text-align:center;color:var(--text2)">'+(m.devuelto||0)+'</td>'+
           '<td style="padding:5px 10px;text-align:center;font-weight:700">'+enUso+'</td>'+
@@ -6034,7 +6040,7 @@ function crearPedidoInstalacionSimple(otId){
   var cliente = DB.clientes.find(function(c){return c.id===ot.clienteId;})||null;
 
   var kitItems = (linea.kit||[]).map(function(item){
-    var comp = DB.componentes.find(function(c){return c.id===item.compId;})||{};
+    var comp = findComponente(item.compId)||{};
     return {
       compId:item.compId,
       compCodigo:comp.codigo||'',
@@ -6084,10 +6090,10 @@ function agregarMaterialExtra(otId){
       '<div class="fg"><label>Motivo</label><input id="me-motivo" placeholder="Motivo del consumo adicional..."></div>'+
     '</div>',
     function(){
-      var compId=parseInt(document.getElementById('me-comp').value)||0;
+      var compId=document.getElementById('me-comp').value;
       var cant=parseFloat(document.getElementById('me-cant').value)||0;
       if(!compId||!cant){alert('Seleccioná componente y cantidad.');return false;}
-      var comp=DB.componentes.find(function(c){return c.id===compId;})||{};
+      var comp=findComponente(compId)||{};
       // Stock salida
       DB.movimientos.push({
         id:DB.nid++, compId:compId, fecha:today(),
@@ -6121,10 +6127,10 @@ function devolverMaterial(otId){
       '<div class="fg"><label>Cantidad a devolver</label><input id="dev-cant" type="number" min="1" value="1"></div>'+
     '</div>',
     function(){
-      var compId=parseInt(document.getElementById('dev-comp').value);
+      var compId=document.getElementById('dev-comp').value;
       var cant=parseFloat(document.getElementById('dev-cant').value)||0;
       if(!cant) return false;
-      var mat=f.materiales.find(function(m){return m.compId===compId;});
+      var mat=f.materiales.find(function(m){return String(m.compId)===String(compId);});
       if(!mat){return false;}
       var enUso=mat.cant-(mat.devuelto||0);
       if(cant>enUso){alert('No podés devolver más de lo que está en uso ('+enUso+').');return false;}
@@ -6215,7 +6221,7 @@ function renderLineasProducto(){
           '<div class="fab-section-title"><span>📦 KIT DE MATERIALES</span></div>'+
           (kit.length===0?'<p class="fab-empty">Sin materiales todavía.</p>':
             kit.map(function(k){
-              var comp=DB.componentes.find(function(c){return c.id===k.compId;})||{};
+              var comp=findComponente(k.compId)||{};
               var stock=stockActual(k.compId);
               return '<div class="fab-kit-row">'+
                 '<span style="flex:1">'+(comp.codigo?comp.codigo+' — ':'')+(comp.desc||k.compNombre||'—')+'</span>'+
@@ -6469,10 +6475,10 @@ function agregarKitItemLinea(lineaId){
       '<div class="fg"><label>Cantidad</label><input id="kl-cant" type="number" min="1" value="1"></div>'+
     '</div>',
     function(){
-      var compId=parseInt(document.getElementById('kl-comp').value)||0;
+      var compId=document.getElementById('kl-comp').value;
       var cant=parseFloat(document.getElementById('kl-cant').value)||0;
       if(!compId||!cant){alert('Seleccioná un componente e ingresá la cantidad.');return false;}
-      var comp=DB.componentes.find(function(c){return c.id===compId;})||{};
+      var comp=findComponente(compId)||{};
       var l=DB.lineasProducto.find(function(x){return x.id===lineaId;});
       l.kit.push({id:DB.nid++, compId:compId, compCodigo:comp.codigo||'', compNombre:comp.desc||'', cant:cant});
       save(); renderLineasProducto(); return true;
@@ -6689,7 +6695,7 @@ function confirmarSalidaStockInst(id){
 
   (p.kit||[]).forEach(function(item){
     if(!item.compId) return;
-    var comp=DB.componentes.find(function(c){return c.id===item.compId;})||{};
+    var comp=findComponente(item.compId)||{};
     DB.movimientos.push({
       id:DB.nid++, compId:item.compId, fecha:today(),
       tipo:'Salida', motivo:'Instalación — '+p.numero+' — '+p.cliente,
@@ -6725,10 +6731,10 @@ function agregarMatInst(piId){
       '<div class="fg"><label>Cantidad</label><input id="mi-cant" type="number" min="1" value="1"></div>'+
     '</div>',
     function(){
-      var compId=parseInt(document.getElementById('mi-comp').value)||0;
+      var compId=document.getElementById('mi-comp').value;
       var cant=parseFloat(document.getElementById('mi-cant').value)||0;
       if(!compId||!cant){alert('Seleccioná componente y cantidad.');return false;}
-      var comp=DB.componentes.find(function(c){return c.id===compId;})||{};
+      var comp=findComponente(compId)||{};
       if(!p.kit) p.kit=[];
       p.kit.push({compId:compId,compCodigo:comp.codigo||'',compNombre:comp.desc||'',cant:cant,unidad:comp.unidad||'',origen:'manual',devuelto:0});
       save(); cerrarModal(); abrirPI(piId); return true;
@@ -6754,7 +6760,7 @@ function renderKitInst(){
   if(!DB.kitinst.length){tb.innerHTML='<tr><td colspan="6" class="empty">Sin materiales en el kit base.</td></tr>';return;}
 
   tb.innerHTML=DB.kitinst.map(function(item,i){
-    var comp=DB.componentes.find(function(c){return c.id===item.compId;})||{};
+    var comp=findComponente(item.compId)||{};
     var stock=stockActual(item.compId);
     var color=stock<item.cant?'var(--red)':stock<item.cant*2?'var(--amber)':'var(--green)';
     return '<tr>'+
@@ -6824,10 +6830,10 @@ function modalKitInstEditar(){
     var inputs = document.querySelectorAll('#mbox input[data-compid]');
     var newKit = [];
     inputs.forEach(function(input){
-      var compId = parseInt(input.dataset.compid);
+      var compId = input.dataset.compid;
       var cant = parseFloat(input.value)||0;
       if(cant > 0){
-        var comp = DB.componentes.find(function(c){return c.id===compId;})||{};
+        var comp = findComponente(compId)||{};
         newKit.push({
           compId: compId,
           compCodigo: comp.codigo||'',
@@ -6863,10 +6869,10 @@ function modalKitInstItem(idx){
         '<input id="ki-cant" type="number" min="1" value="'+(item?item.cant:1)+'"></div>'+
     '</div>',
     function(){
-      var compId=parseInt(document.getElementById('ki-comp').value)||0;
+      var compId=document.getElementById('ki-comp').value;
       var cant=parseFloat(document.getElementById('ki-cant').value)||0;
       if(!compId||!cant){alert('Seleccioná un componente e ingresá la cantidad.');return false;}
-      var comp=DB.componentes.find(function(c){return c.id===compId;})||{};
+      var comp=findComponente(compId)||{};
       var newItem={compId:compId,compCodigo:comp.codigo||'',compNombre:comp.desc||'',cant:cant};
       if(idx>=0){DB.kitinst[idx]=newItem;}else{DB.kitinst.push(newItem);}
       DB.kitinstVersion=(parseInt(DB.kitinstVersion||0)+1);
