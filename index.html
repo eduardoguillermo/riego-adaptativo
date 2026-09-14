@@ -46,7 +46,7 @@ function toggleNav(el){
   var pad = function(n){ return String(n).padStart(2,'0'); };
   var fecha = pad(now.getDate())+'/'+pad(now.getMonth()+1)+'/'+now.getFullYear();
   var hora = pad(now.getHours())+':'+pad(now.getMinutes());
-  if(el) el.textContent = 'Riego Adaptativo · '+fecha+' · '+hora+' · v2.1';
+  if(el) el.textContent = 'Riego Adaptativo · '+fecha+' · '+hora+' · v2.2';
   document.addEventListener('keydown', function(e){
     if(e.key==='Enter') cerrarSplash();
   });
@@ -64,7 +64,7 @@ function cerrarSplash(){
 <div class="topbar">
   <div class="brand">
     <div class="brand-icon">💧</div>
-    <div><div class="brand-name">Riego Adaptativo <span style="color:#FFB300">[DEV]</span></div><span class="brand-sub">Sistema Administrativo v2.1 — AquaSeries: Fabricación, Presupuestos y sensores de riego</span></div>
+    <div><div class="brand-name">Riego Adaptativo <span style="color:#FFB300">[DEV]</span></div><span class="brand-sub">Sistema Administrativo v2.2 — AquaSeries: Fabricación, Presupuestos y sensores de riego</span></div>
   </div>
   <div style="position:relative;flex:1;max-width:400px;margin:0 auto">
     <input id="global-search" type="text" placeholder="🔍 Buscar clientes, presupuestos, componentes..."
