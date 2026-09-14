@@ -1,0 +1,21 @@
+{
+  "name": "Riego Adaptativo — Escáner",
+  "short_name": "Escáner Riego",
+  "start_url": "/riego-adaptativo/escaner.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#256282",
+  "icons": [
+    {
+      "src": "icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
