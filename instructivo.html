@@ -129,7 +129,7 @@
 
 <div class="layout">
 <nav class="sidebar">
-  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v2.1</p></div></div>
+  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v2.2</p></div></div>
 
   <div class="section-label">Introducción</div>
   <a href="#intro">🏠 ¿Qué es esta app?</a>
@@ -181,7 +181,7 @@
     <h1>💧 Riego Adaptativo</h1>
     <p>Manual del sistema administrativo — ciclo completo del negocio, de presupuesto a mantenimiento</p>
     <div class="hero-badges">
-      <span class="badge badge-red">✓ v2.1</span>
+      <span class="badge badge-red">✓ v2.2</span>
       <span class="badge badge-blue">✓ Sin servidor</span>
       <span class="badge badge-amber">✓ Datos locales</span>
     </div>
@@ -529,6 +529,13 @@
       <summary class="changelog-summary">Ver historial de versiones</summary>
 
       <div class="changelog-entry">
+      <div class="changelog-entry">
+        <div class="changelog-version"><span class="v-num">v2.2</span><span class="changelog-tag tag-fix">fix</span></div>
+        <ul class="changelog-list">
+          <li>Los materiales y movimientos creados desde el escáner de código de barras tienen un ID de texto (a diferencia de los creados en la PC, que son numéricos) — varios lugares de Catálogo, Movimientos, kits de línea de producto y kit base de instalación asumían que el ID siempre era un número, lo que rompía la edición y el borrado de esos registros, y en algunos casos generaba un botón inválido directamente. Corregido con una búsqueda que compara por igual sin importar el tipo, en todos los puntos donde se selecciona o referencia un componente o un movimiento de stock.</li>
+        </ul>
+      </div>
+
         <div class="changelog-version"><span class="v-num">v2.1</span><span class="changelog-tag tag-feature">feature</span></div>
         <ul class="changelog-list">
           <li><b>Escáner de código de barras</b> para movimientos de stock, adaptado del mismo patrón ya probado en VSS Logística. Cada componente del Catálogo ahora tiene un campo EAN opcional. Desde Catálogo, "📷 Abrir escáner" lleva a una app liviana para celular (<code>escaner.html</code>) que lee el código con la cámara (o a mano si el navegador no soporta lectura automática): si el EAN ya está vinculado, registra Entrada/Salida en dos toques; si no, deja vincularlo a un componente existente o crear uno nuevo con ese EAN.</li>
