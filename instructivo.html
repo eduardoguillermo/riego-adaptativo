@@ -129,7 +129,7 @@
 
 <div class="layout">
 <nav class="sidebar">
-  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v2.0</p></div></div>
+  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v2.1</p></div></div>
 
   <div class="section-label">Introducción</div>
   <a href="#intro">🏠 ¿Qué es esta app?</a>
@@ -181,7 +181,7 @@
     <h1>💧 Riego Adaptativo</h1>
     <p>Manual del sistema administrativo — ciclo completo del negocio, de presupuesto a mantenimiento</p>
     <div class="hero-badges">
-      <span class="badge badge-red">✓ v2.0</span>
+      <span class="badge badge-red">✓ v2.1</span>
       <span class="badge badge-blue">✓ Sin servidor</span>
       <span class="badge badge-amber">✓ Datos locales</span>
     </div>
@@ -315,6 +315,9 @@
     <h2>Estado crítico</h2>
     <p>Un componente queda "crítico" cuando su stock disponible cae por debajo del mínimo configurado (solo si el mínimo es mayor a 0). El botón "⚠️ Solo críticos" filtra la tabla a esos casos, y son la base de la <a href="#ordenes">orden de compra automática</a>.</p>
     <p>Ambas tablas se pueden ordenar haciendo clic en los encabezados, y tienen su versión imprimible en PDF.</p>
+    <h2>Escáner de código de barras</h2>
+    <p>Cada componente puede tener un <b>EAN</b> (código de barras) opcional. "📷 Abrir escáner" lleva a una app liviana pensada para el celular: apunta la cámara al código y, si ya está vinculado a un componente, deja registrar una Entrada o Salida en dos toques, sin buscar nada a mano. Si el código todavía no está vinculado a ningún componente, ofrece vincularlo a uno existente o crear uno nuevo con ese EAN.</p>
+    <p>El escáner guarda sus datos aparte, en el propio celular, y se pone al día con esta app a través de una carpeta <code>RiegoAdaptativoStock</code> en Google Drive. "☁️ Sincronizar con escáner" trae los movimientos cargados desde el celular y sube los cambios hechos acá — no hace falta usar el mismo dispositivo en los dos lados.</p>
   </section>
 
   <!-- MOVIMIENTOS -->
@@ -524,6 +527,14 @@
 
     <details class="changelog-details" open>
       <summary class="changelog-summary">Ver historial de versiones</summary>
+
+      <div class="changelog-entry">
+        <div class="changelog-version"><span class="v-num">v2.1</span><span class="changelog-tag tag-feature">feature</span></div>
+        <ul class="changelog-list">
+          <li><b>Escáner de código de barras</b> para movimientos de stock, adaptado del mismo patrón ya probado en VSS Logística. Cada componente del Catálogo ahora tiene un campo EAN opcional. Desde Catálogo, "📷 Abrir escáner" lleva a una app liviana para celular (<code>escaner.html</code>) que lee el código con la cámara (o a mano si el navegador no soporta lectura automática): si el EAN ya está vinculado, registra Entrada/Salida en dos toques; si no, deja vincularlo a un componente existente o crear uno nuevo con ese EAN.</li>
+          <li>El escáner sincroniza el stock con esta app vía una carpeta <code>RiegoAdaptativoStock</code> en Google Drive — "☁️ Sincronizar con escáner" en Catálogo trae los movimientos cargados desde el celular y sube los cambios hechos acá.</li>
+        </ul>
+      </div>
 
       <div class="changelog-entry">
         <div class="changelog-version"><span class="v-num">v2.0</span><span class="changelog-tag tag-fix">fix</span></div>
