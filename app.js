@@ -132,6 +132,82 @@ function save(){
   localStorage.setItem(SKEY,JSON.stringify(DB));
   if(window._vssFolderHandle) vssBackupEnCarpeta(window._vssFolderHandle);
   vssSyncDebounce();
+  scheduleStockPush();
+}
+
+// =======================================================
+// SYNC DE STOCK CON EL ESCÁNER (componentes + movimientos, por EAN)
+// Carpeta de Drive "RiegoAdaptativoStock" — puente entre esta app y escaner.html
+// =======================================================
+function mergeStockRemoto(remote){
+  if(!remote) return;
+  if(!DB.componentes) DB.componentes=[];
+  if(!DB.movimientos) DB.movimientos=[];
+  if(!DB.config) DB.config={};
+  var byId={}; DB.componentes.forEach(function(c){byId[c.id]=c;});
+  (remote.componentes||[]).forEach(function(rc){
+    var local=byId[rc.id];
+    if(!local){ DB.componentes.push(rc); byId[rc.id]=rc; }
+    else if((rc.lastModified||0) > (local.lastModified||0)){ Object.assign(local, rc); }
+  });
+  var movIds={}; DB.movimientos.forEach(function(m){movIds[m.id]=true;});
+  (remote.movimientos||[]).forEach(function(rm){
+    if(!movIds[rm.id]){ DB.movimientos.push(rm); movIds[rm.id]=true; }
+  });
+  ['motivosSalida','origenesEntrada'].forEach(function(k){
+    var localArr=DB.config[k]||[];
+    var remoteArr=(remote.config&&remote.config[k])||[];
+    remoteArr.forEach(function(v){ if(localArr.indexOf(v)===-1) localArr.push(v); });
+    DB.config[k]=localArr;
+  });
+}
+
+function stockBackupPayload(){
+  return {
+    componentes: DB.componentes||[],
+    movimientos: DB.movimientos||[],
+    config: {
+      motivosSalida: (DB.config&&DB.config.motivosSalida)||[],
+      origenesEntrada: (DB.config&&DB.config.origenesEntrada)||[]
+    },
+    updatedAt: Date.now()
+  };
+}
+
+var _stockPushTimer=null;
+function scheduleStockPush(){
+  if(!window._vssStockDriveOn) return; // recién empieza a empujar solo después de conectar una vez
+  if(_stockPushTimer) clearTimeout(_stockPushTimer);
+  _stockPushTimer=setTimeout(function(){
+    vssDriveGetToken(function(token){
+      vssDriveEnsureFolderNamed(token, 'RiegoAdaptativoStock', function(folderId){
+        vssDriveSubirArchivo(token, folderId, 'riego-adaptativo-stock.json', stockBackupPayload(), function(){});
+      });
+    });
+  }, 1500);
+}
+
+function syncStockDesdeDrive(mostrarAlert){
+  vssDriveGetToken(function(token){
+    window._vssStockDriveOn = true;
+    vssDriveEnsureFolderNamed(token, 'RiegoAdaptativoStock', function(folderId){
+      vssDriveBuscarArchivo(token, folderId, 'riego-adaptativo-stock.json', function(f){
+        function subirYAvisar(esNuevo){
+          vssDriveSubirArchivo(token, folderId, 'riego-adaptativo-stock.json', stockBackupPayload(), function(){
+            if(mostrarAlert) alert(esNuevo?'Stock conectado a Drive. Ya se puede usar el escáner desde el celular.':'Stock sincronizado con Drive.');
+          });
+        }
+        if(!f){ subirYAvisar(true); return; }
+        vssDriveBajarJSON(token, f.id, function(remote){
+          mergeStockRemoto(remote);
+          localStorage.setItem(SKEY, JSON.stringify(DB));
+          invalidarStockCache();
+          renderStock();renderCatalogo();renderMovimientos();
+          subirYAvisar(false);
+        });
+      });
+    });
+  });
 }
 
 // =======================================================
@@ -2291,6 +2367,7 @@ function modalComponente(id){
     '<div class="fg2">'+
       '<div class="fg"><label>Código *</label><input id="cp-cod" value="'+(c?c.codigo:'')+'" placeholder="Ej: ESP32-D0WD"></div>'+
       '<div class="fg"><label>Descripción *</label><input id="cp-desc" value="'+(c?c.desc:'')+'" placeholder="Ej: Módulo ESP32 D0WD-V3"></div>'+
+      '<div class="fg"><label>EAN</label><input id="cp-ean" value="'+(c?c.ean||'':'')+'" placeholder="Código de barras (opcional)"></div>'+
       '<div class="fg"><label>Categoría *</label>'+
         '<input id="cp-cat" value="'+(c?c.categoria:'')+'" placeholder="Ej: Electrónica" list="cats-list">'+
         '<datalist id="cats-list">'+catOpts+'</datalist></div>'+
@@ -2332,6 +2409,7 @@ function modalComponente(id){
       if(!cod||!desc||!cat){alert('Código, descripción y categoría son obligatorios.');return false;}
       if(c){
         c.codigo=cod;c.desc=desc;c.categoria=cat;
+        c.ean=document.getElementById('cp-ean').value.trim();
         c.unidad=document.getElementById('cp-uni').value;
         c.min=parseFloat(document.getElementById('cp-min').value)||0;
         c.costo=parseFloat(document.getElementById('cp-costo').value)||0;
@@ -2350,6 +2428,7 @@ function modalComponente(id){
         var newId=DB.nid++;
         DB.componentes.push({
           id:newId,codigo:cod,desc:desc,categoria:cat,
+          ean:document.getElementById('cp-ean')?document.getElementById('cp-ean').value.trim():'',
           unidad:document.getElementById('cp-uni')?document.getElementById('cp-uni').value:'',
           min:parseFloat(document.getElementById('cp-min')?document.getElementById('cp-min').value:0)||0,
           precio:newCosto,
