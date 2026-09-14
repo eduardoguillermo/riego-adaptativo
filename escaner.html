@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Riego Adaptativo — Escáner</title>
+<link rel="manifest" href="manifest-escaner.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap">
+<style>
+  :root{
+    --brand:#256282; --brand-dark:#1A4A63; --brand-light:#E6F1FB;
+    --bg:#f1f5f9; --card:#ffffff; --border:#e2e8f0;
+    --ink:#1e293b; --sub:#64748b; --ok:#16a34a; --bad:#dc2626; --dev:#4DD0E1; --sig:#93c5fd;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--ink);}
+  .topbar{background:var(--brand); color:#fff; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:5;}
+  .topbar .name{font-weight:700; font-size:15px;}
+  .topbar .ver{font-family:monospace; font-size:10px; opacity:.85;}
+  .screen{display:none; flex-direction:column; padding:16px; max-width:480px; margin:0 auto;}
+  .screen.on{display:flex;}
+
+  #reader{width:100%; aspect-ratio:1/1; background:#0b1120; border-radius:16px; overflow:hidden; position:relative;}
+  #reader video{width:100%; height:100%; object-fit:cover;}
+  .marco{position:absolute; left:17%; right:17%; top:34%; bottom:34%; border:3px solid var(--dev); border-radius:8px; pointer-events:none;}
+  .hint{text-align:center; color:var(--sub); font-size:12px; font-family:monospace; margin:10px 0 16px;}
+
+  .manual{display:flex; gap:8px; margin-bottom:14px;}
+  .manual input{flex:1; padding:12px; border-radius:10px; border:1.5px solid var(--border); font-size:14px;}
+  .manual button{padding:12px 16px; border-radius:10px; border:none; background:var(--ink); color:#fff; font-weight:600;}
+
+  .prod-hit{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:14px;}
+  .prod-hit .cod{font-family:monospace; font-size:11px; color:var(--sub);}
+  .prod-hit h3{margin:4px 0 0; font-size:16px;}
+  .prod-hit .st{font-size:12px; color:var(--sub); margin-top:3px;}
+
+  .fg{margin-bottom:12px;}
+  .fg label{display:block; font-size:11px; color:var(--sub); font-weight:600; margin-bottom:5px;}
+  .fg input, .fg select{width:100%; padding:12px; border-radius:10px; border:1.5px solid var(--border); font-size:14px; background:#fff; color:var(--ink);}
+
+  .bigbtn{padding:18px; border-radius:16px; border:none; color:#fff; font-weight:700; font-size:15px; margin-bottom:10px; cursor:pointer; width:100%;}
+  .bigbtn.add{background:var(--ok);}
+  .bigbtn.rem{background:var(--bad);}
+  .bigbtn.neu{background:var(--brand);}
+  .ghostbtn{padding:13px; border-radius:12px; border:1.5px solid var(--border); background:transparent; color:var(--sub); font-weight:600; font-size:13px; cursor:pointer; width:100%;}
+
+  .row2{display:flex; gap:10px;}
+  .row2 .bigbtn{flex:1;}
+
+  .salir{margin-top:16px; padding:12px; border-radius:12px; border:1.5px solid var(--border); background:transparent; color:var(--sub); font-weight:700; font-size:13px; cursor:pointer; width:100%; text-align:center; text-decoration:none; display:block;}
+  .signature{text-align:center; font-family:'Dancing Script',cursive; color:var(--sig); font-size:14px; padding:16px 0 6px;}
+</style>
+</head>
+<body>
+
+<div class="topbar"><span class="name">📷 Riego Adaptativo — Escáner</span><span class="ver" id="verLabel">v1.0.0</span></div>
+
+<!-- PANTALLA 1: escaneo -->
+<div class="screen on" id="s1">
+  <div id="reader"><div class="marco"></div></div>
+  <div class="hint" id="camHint">Apuntá al código de barras</div>
+
+  <div class="manual">
+    <input id="manualEan" type="text" inputmode="numeric" placeholder="O ingresá el código manualmente">
+    <button onclick="procesarCodigo(document.getElementById('manualEan').value.trim())">Ir</button>
+  </div>
+
+  <div class="hint" id="driveStatus" style="margin-bottom:10px">☁️ No conectado</div>
+  <button class="ghostbtn" style="margin-bottom:10px" onclick="conectarDrive()">☁️ Conectar Drive</button>
+  <a class="salir" href="index.html">🏠 Volver a la app completa</a>
+  <div class="signature">Development by Guille</div>
+</div>
+
+<!-- PANTALLA 2: material encontrado -->
+<div class="screen" id="s2">
+  <div class="prod-hit">
+    <div class="cod" id="s2cod"></div>
+    <h3 id="s2nombre"></h3>
+    <div class="st" id="s2stock"></div>
+  </div>
+
+  <div id="s2acciones">
+    <div class="row2">
+      <button class="bigbtn add" onclick="mostrarFormEntrada()">➕ Entrada</button>
+      <button class="bigbtn rem" onclick="mostrarFormSalida()">➖ Salida</button>
+    </div>
+  </div>
+
+  <div id="s2form" style="display:none"></div>
+
+  <button class="ghostbtn" onclick="volverAEscanear()">Cancelar</button>
+</div>
+
+<!-- PANTALLA 2b: material no encontrado -->
+<div class="screen" id="s2b">
+  <div class="prod-hit">
+    <div class="cod" id="s2bean"></div>
+    <div class="st">Sin vincular a ningún material</div>
+  </div>
+
+  <div id="s2bAcciones">
+    <button class="bigbtn neu" onclick="mostrarFormVincular()">🔗 Vincular a material existente</button>
+    <button class="bigbtn add" onclick="mostrarFormNuevo()">✨ Crear material nuevo</button>
+  </div>
+
+  <div id="s2bform" style="display:none"></div>
+
+  <button class="ghostbtn" onclick="volverAEscanear()">Cancelar</button>
+</div>
+
+<!-- PANTALLA 3: confirmación -->
+<div class="screen" id="s3">
+  <div class="prod-hit" style="border-color:var(--ok); border-width:1.5px;">
+    <div class="cod">✓ Guardado</div>
+    <h3 id="s3resumen"></h3>
+  </div>
+  <button class="bigbtn neu" onclick="volverAEscanear()">Escanear otro</button>
+</div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="drive-sync.js"></script>
+<script>
+const SKEY = 'riego-stock-esc';
+const APP_VERSION = '1.0.0';
+document.getElementById('verLabel').textContent = 'v' + APP_VERSION;
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
+
+function getDB(){
+  try{ var d = JSON.parse(localStorage.getItem(SKEY)); return d || {}; }catch(e){ return {}; }
+}
+function saveDB(db){ localStorage.setItem(SKEY, JSON.stringify(db)); }
+function today(){
+  var d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function stockDe(db, cid){
+  var st=0;
+  (db.movimientos||[]).forEach(function(m){
+    var mcid=m.cid||m.compId;
+    if(mcid===cid) st += m.tipo==='Entrada' ? (parseFloat(m.cant)||0) : -(parseFloat(m.cant)||0);
+  });
+  return st;
+}
+function genId(){ return 'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+
+function mergeStockRemoto(db, remote){
+  if(!remote) return;
+  db.componentes = db.componentes || [];
+  db.movimientos = db.movimientos || [];
+  db.config = db.config || {};
+  var byId={}; db.componentes.forEach(function(c){byId[c.id]=c;});
+  (remote.componentes||[]).forEach(function(rc){
+    var local=byId[rc.id];
+    if(!local){ db.componentes.push(rc); byId[rc.id]=rc; }
+    else if((rc.lastModified||0) > (local.lastModified||0)){ Object.assign(local, rc); }
+  });
+  var movIds={}; db.movimientos.forEach(function(m){movIds[m.id]=true;});
+  (remote.movimientos||[]).forEach(function(rm){
+    if(!movIds[rm.id]){ db.movimientos.push(rm); movIds[rm.id]=true; }
+  });
+  ['motivosSalida','origenesEntrada'].forEach(function(k){
+    var localArr=db.config[k]||[];
+    var remoteArr=(remote.config&&remote.config[k])||[];
+    remoteArr.forEach(function(v){ if(localArr.indexOf(v)===-1) localArr.push(v); });
+    db.config[k]=localArr;
+  });
+}
+
+function stockBackupPayload(db){
+  return {
+    componentes: db.componentes||[],
+    movimientos: db.movimientos||[],
+    config: {
+      motivosSalida: (db.config&&db.config.motivosSalida)||[],
+      origenesEntrada: (db.config&&db.config.origenesEntrada)||[]
+    },
+    updatedAt: Date.now()
+  };
+}
+
+async function syncPull(){
+  var el=document.getElementById('driveStatus');
+  if(!DriveSync.conectado) return;
+  try{
+    if(el) el.textContent='☁️ Sincronizando...';
+    var remote = await DriveSync.bajarBackup();
+    var db = getDB();
+    mergeStockRemoto(db, remote);
+    saveDB(db);
+    if(el) el.textContent='☁️ Sincronizado · '+new Date().toLocaleTimeString();
+  }catch(e){
+    console.error('Error sync pull', e);
+    if(el) el.textContent='☁️ Error al sincronizar';
+  }
+}
+
+async function syncPush(){
+  var el=document.getElementById('driveStatus');
+  if(!DriveSync.conectado) return;
+  try{
+    var remote = await DriveSync.bajarBackup();
+    var db = getDB();
+    mergeStockRemoto(db, remote);
+    saveDB(db);
+    await DriveSync.subirBackup(stockBackupPayload(db));
+    if(el) el.textContent='☁️ Sincronizado · '+new Date().toLocaleTimeString();
+  }catch(e){
+    console.error('Error sync push', e);
+    if(el) el.textContent='☁️ Error al sincronizar (se guardó localmente)';
+  }
+}
+
+function conectarDrive(){
+  DriveSync.init(function(){
+    document.getElementById('driveStatus').textContent='☁️ Conectado';
+    syncPull();
+  });
+  DriveSync.conectar();
+}
+
+let eanActual = null;
+let barcodeDetector = null;
+let scanLoopActive = false;
+
+function mostrar(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+
+function volverAEscanear(){
+  eanActual = null;
+  document.getElementById('manualEan').value = '';
+  document.getElementById('s2form').style.display='none';
+  document.getElementById('s2form').innerHTML='';
+  document.getElementById('s2acciones').style.display='block';
+  document.getElementById('s2bform').style.display='none';
+  document.getElementById('s2bform').innerHTML='';
+  document.getElementById('s2bAcciones').style.display='block';
+  mostrar('s1');
+  iniciarCamara();
+}
+
+function procesarCodigo(ean){
+  if(!ean) return;
+  detenerCamara();
+  eanActual = ean;
+  var db = getDB();
+  var comp = (db.componentes||[]).find(function(c){ return c.ean===ean; });
+  if(comp){
+    document.getElementById('s2cod').textContent = comp.codigo || ean;
+    document.getElementById('s2nombre').textContent = comp.desc;
+    document.getElementById('s2stock').textContent = 'Stock actual: ' + stockDe(db, comp.id) + ' ' + (comp.unidad||'u');
+    mostrar('s2');
+  } else {
+    document.getElementById('s2bean').textContent = ean;
+    mostrar('s2b');
+  }
+}
+
+function mostrarFormEntrada(){
+  document.getElementById('s2acciones').style.display='none';
+  document.getElementById('s2form').style.display='block';
+  var db = getDB();
+  var origenes = (db.config && db.config.origenesEntrada) || ['Compra','Devolución','Otro'];
+  document.getElementById('s2form').innerHTML =
+    '<div class="fg"><label>Cantidad</label><input id="f-cant" type="number" min="1" value="1" inputmode="numeric"></div>'+
+    '<div class="fg"><label>Origen</label><select id="f-origen">'+
+      origenes.map(function(o){ return '<option value="'+o+'">'+o+'</option>'; }).join('')+
+    '</select></div>'+
+    '<button class="bigbtn add" onclick="confirmarEntrada()">Confirmar entrada</button>';
+}
+
+async function mostrarFormSalida(){
+  document.getElementById('s2acciones').style.display='none';
+  document.getElementById('s2form').style.display='block';
+  if(typeof DriveSync!=='undefined' && DriveSync.conectado){
+    document.getElementById('s2form').innerHTML = '<div class="hint">Actualizando motivos...</div>';
+    await syncPull();
+  }
+  var db = getDB();
+  var motivos = (db.config && db.config.motivosSalida) || ['Merma / descarte','Uso interno / prototipo','Garantía cliente','Reposición a cliente','Prueba de calidad','Devolución a proveedor','Rotura / daño'];
+  document.getElementById('s2form').innerHTML =
+    '<div class="fg"><label>Cantidad</label><input id="f-cant" type="number" min="1" value="1" inputmode="numeric"></div>'+
+    '<div class="fg"><label>Motivo</label><select id="f-motivo">'+
+      motivos.map(function(m){ return '<option value="'+m+'">'+m+'</option>'; }).join('')+
+    '</select></div>'+
+    '<button class="bigbtn rem" onclick="confirmarSalida()">Confirmar salida</button>';
+}
+
+function confirmarEntrada(){
+  var cant = parseFloat(document.getElementById('f-cant').value) || 0;
+  if(cant<=0){ alert('Ingresá una cantidad válida.'); return; }
+  var origen = document.getElementById('f-origen').value;
+  var db = getDB();
+  var comp = (db.componentes||[]).find(function(c){ return c.ean===eanActual; });
+  if(!comp) return;
+  db.movimientos = db.movimientos || [];
+  db.movimientos.push({ id:genId(), cid:comp.id, tipo:'Entrada', cant:cant, fecha:today(), precio:parseFloat(comp.costo)||0, origen:origen, estadoMat:'N', nota:'Escaneo rápido' });
+  saveDB(db);
+  document.getElementById('s3resumen').textContent = '➕ Entrada · ' + cant + ' ' + (comp.unidad||'u') + ' · ' + comp.desc;
+  mostrar('s3');
+  syncPush();
+}
+
+function confirmarSalida(){
+  var cant = parseFloat(document.getElementById('f-cant').value) || 0;
+  var motivo = document.getElementById('f-motivo').value;
+  if(cant<=0){ alert('Ingresá una cantidad válida.'); return; }
+  if(!motivo){ alert('Seleccioná el motivo.'); return; }
+  var db = getDB();
+  var comp = (db.componentes||[]).find(function(c){ return c.ean===eanActual; });
+  if(!comp) return;
+  db.movimientos = db.movimientos || [];
+  db.movimientos.push({ id:genId(), cid:comp.id, tipo:'Salida manual', cant:cant, fecha:today(), nota:motivo, estadoMat:'N' });
+  saveDB(db);
+  document.getElementById('s3resumen').textContent = '➖ Salida · ' + cant + ' ' + (comp.unidad||'u') + ' · ' + comp.desc + ' · ' + motivo;
+  mostrar('s3');
+  syncPush();
+}
+
+function mostrarFormVincular(){
+  var db = getDB();
+  var comps = (db.componentes||[]).slice().sort(function(a,b){ return (a.desc||'').localeCompare(b.desc||'','es'); });
+  document.getElementById('s2bAcciones').style.display='none';
+  document.getElementById('s2bform').style.display='block';
+  document.getElementById('s2bform').innerHTML =
+    '<div class="fg"><label>Material</label><select id="f-vinc-cid">'+
+      '<option value="">-- seleccionar --</option>'+
+      comps.map(function(c){ return '<option value="'+c.id+'">'+(c.codigo||'')+' — '+c.desc+'</option>'; }).join('')+
+    '</select></div>'+
+    '<button class="bigbtn neu" onclick="confirmarVincular()">Vincular EAN</button>';
+}
+
+function confirmarVincular(){
+  var cidStr = document.getElementById('f-vinc-cid').value;
+  if(!cidStr){ alert('Seleccioná un material.'); return; }
+  var db = getDB();
+  var comp = (db.componentes||[]).find(function(c){ return String(c.id)===cidStr; });
+  if(!comp) return;
+  comp.ean = eanActual;
+  comp.lastModified = Date.now();
+  saveDB(db);
+  document.getElementById('s3resumen').textContent = '🔗 EAN vinculado a ' + comp.desc;
+  mostrar('s3');
+  syncPush();
+}
+
+function mostrarFormNuevo(){
+  document.getElementById('s2bAcciones').style.display='none';
+  document.getElementById('s2bform').style.display='block';
+  document.getElementById('s2bform').innerHTML =
+    '<div class="fg"><label>Nombre del material</label><input id="f-nuevo-nombre" placeholder="Ej: Caño PVC 25mm"></div>'+
+    '<div class="fg"><label>Cantidad inicial</label><input id="f-nuevo-cant" type="number" min="0" value="1" inputmode="numeric"></div>'+
+    '<button class="bigbtn add" onclick="confirmarNuevo()">Crear material</button>';
+}
+
+function confirmarNuevo(){
+  var nombre = (document.getElementById('f-nuevo-nombre').value||'').trim();
+  if(!nombre){ alert('Ingresá el nombre del material.'); return; }
+  var cant = parseFloat(document.getElementById('f-nuevo-cant').value) || 0;
+  var db = getDB();
+  db.componentes = db.componentes || [];
+  db.movimientos = db.movimientos || [];
+  var newId = genId();
+  db.componentes.push({
+    id:newId, ean:eanActual, codigo:eanActual, desc:nombre, categoria:'',
+    unidad:'u', min:0, costo:0, precio:0, costo_usd:0,
+    area:'', proveedor:'', ubicacion:'', nroCajon:'', estadoMat:'N', notas:'', lastModified:Date.now()
+  });
+  if(cant>0){
+    db.movimientos.push({ id:genId(), cid:newId, tipo:'Entrada', cant:cant, fecha:today(), precio:0, origen:'Compra', estadoMat:'N', nota:'Alta por escaneo' });
+  }
+  saveDB(db);
+  document.getElementById('s3resumen').textContent = '✨ Material creado · ' + nombre;
+  mostrar('s3');
+  syncPush();
+}
+
+// ---- Cámara: BarcodeDetector nativo (Chrome/Android). Fallback: input manual. ----
+async function iniciarCamara(){
+  const hint = document.getElementById('camHint');
+  if(!('BarcodeDetector' in window)){
+    hint.textContent = 'Tu navegador no soporta lectura automática — usá el código manual abajo';
+    return;
+  }
+  try{
+    barcodeDetector = new BarcodeDetector({ formats: ['ean_13','ean_8','upc_a','upc_e','code_128'] });
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    const reader = document.getElementById('reader');
+    let video = reader.querySelector('video');
+    if(!video){ video = document.createElement('video'); video.autoplay = true; video.muted = true; video.playsInline = true; reader.prepend(video); }
+    video.srcObject = stream;
+    scanLoopActive = true;
+    loopEscaneo(video);
+  }catch(e){
+    console.error('Camara error', e);
+    hint.textContent = 'No se pudo abrir la cámara — usá el código manual abajo';
+  }
+}
+
+async function loopEscaneo(video){
+  if(!scanLoopActive) return;
+  try{
+    const codes = await barcodeDetector.detect(video);
+    if(codes.length){ procesarCodigo(codes[0].rawValue); return; }
+  }catch(e){ /* frame sin lectura, seguir intentando */ }
+  requestAnimationFrame(() => loopEscaneo(video));
+}
+
+function detenerCamara(){
+  scanLoopActive = false;
+  const video = document.querySelector('#reader video');
+  if(video && video.srcObject){ video.srcObject.getTracks().forEach(t=>t.stop()); }
+}
+
+iniciarCamara();
+
+// Reconexion silenciosa a Drive (si ya habia un token guardado vigente) y sync inicial
+if(typeof DriveSync!=='undefined'){
+  DriveSync.init(function(){
+    document.getElementById('driveStatus').textContent='☁️ Conectado';
+    syncPull();
+  });
+  DriveSync.conectar();
+}
+</script>
+
+</body>
+</html>
