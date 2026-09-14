@@ -63,7 +63,7 @@
   <div class="hint" id="camHint">Apuntá al código de barras</div>
 
   <div class="manual">
-    <input id="manualEan" type="text" inputmode="numeric" placeholder="O ingresá el código manualmente">
+    <input id="manualEan" type="text" inputmode="numeric" placeholder="O ingresá el código manualmente" onkeydown="if(event.key==='Enter'){procesarCodigo(this.value.trim());}">
     <button onclick="procesarCodigo(document.getElementById('manualEan').value.trim())">Ir</button>
   </div>
 
