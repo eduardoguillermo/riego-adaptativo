@@ -1068,18 +1068,32 @@ function vssMostrarSnapshots(){
     '</div>';
   document.body.appendChild(ov);
 }
-function vssSalir(){
+async function vssSalir(){
   const ok = vssHacerSnapshot(true);
-  var lineas = '📦 Backup al salir\n\n'+(ok?'✅':'❌')+' Snapshot local: '+(ok?'guardado':'error');
-  if(window._vssFolderHandle){ lineas += '\n⏳ Carpeta local: guardando...'; vssBackupEnCarpeta(window._vssFolderHandle); }
-  else lineas += '\n➖ Carpeta local: no vinculada';
-  if(vssGToken || vssGTokenCargarLocal()){
-    lineas += '\n⏳ Google Drive: sincronizando...';
-    if(_vssSyncPendiente) vssSyncSilencioso();
+  var lineas = ['📦 Backup al salir', '', (ok?'✅':'❌')+' Snapshot local: '+(ok?'guardado':'error')];
+
+  if(window._vssFolderHandle){
+    try{
+      const permOk = await vssVerificarPermiso(window._vssFolderHandle);
+      if(permOk){ await vssBackupEnCarpeta(window._vssFolderHandle); lineas.push('✅ Carpeta local: guardado'); }
+      else lineas.push('❌ Carpeta local: error de permisos');
+    }catch(e){ lineas.push('❌ Carpeta local: error'); }
   } else {
-    lineas += '\n➖ Google Drive: no conectado';
+    lineas.push('➖ Carpeta local: no vinculada');
   }
-  alert(lineas);
+
+  if(vssGToken || vssGTokenCargarLocal()){
+    if(_vssSyncPendiente){
+      await vssSyncSilencioso();
+      lineas.push(_vssSyncPendiente ? '⚠️ Google Drive: no se pudo sincronizar' : '✅ Google Drive: sincronizado');
+    } else {
+      lineas.push('✅ Google Drive: al día');
+    }
+  } else {
+    lineas.push('➖ Google Drive: no conectado');
+  }
+
+  alert(lineas.join('\n'));
   window.close();
 }
 
