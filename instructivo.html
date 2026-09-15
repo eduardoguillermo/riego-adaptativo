@@ -129,7 +129,7 @@
 
 <div class="layout">
 <nav class="sidebar">
-  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v2.7</p></div></div>
+  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v2.8</p></div></div>
 
   <div class="section-label">Introducción</div>
   <a href="#intro">🏠 ¿Qué es esta app?</a>
@@ -180,7 +180,7 @@
     <h1>💧 Riego Adaptativo</h1>
     <p>Manual del sistema administrativo — ciclo completo del negocio, de presupuesto a mantenimiento</p>
     <div class="hero-badges">
-      <span class="badge badge-red">✓ v2.7</span>
+      <span class="badge badge-red">✓ v2.8</span>
       <span class="badge badge-blue">✓ Sin servidor</span>
       <span class="badge badge-amber">✓ Datos locales</span>
     </div>
@@ -231,7 +231,7 @@
     <div class="note">📌 Los relevamientos importados no traen línea de producto asignada todavía — la app móvil de relevamiento no maneja líneas de producto, solo releva datos del terreno — hay que elegirla a mano en el presupuesto una vez importado.</div>
 
     <h2>PDF y envío por email</h2>
-    <p>"📄 PDF" abre el presupuesto en una pestaña nueva, lista para "🖨️ Imprimir / Guardar PDF" — útil para revisarlo o guardarlo a mano. "📧 Email" hace algo distinto: genera el PDF real en el momento y lo envía directo por Gmail con el archivo ya adjunto, sin abrir ningún diálogo de impresión ni tener que adjuntar nada a mano. La primera vez que se use va a pedir permiso de Google para enviar correo, además del permiso de Drive ya conocido.</p>
+    <p>"📄 PDF" abre el presupuesto en una pestaña nueva, lista para "🖨️ Imprimir / Guardar PDF" — útil para revisarlo o guardarlo a mano, en el diseño ancho de siempre (hoja A4). "📧 Email" hace algo distinto: genera un PDF con <b>diseño propio pensado para celular</b> (una sola columna, letra grande, hoja A5) y lo envía directo por Gmail con el archivo ya adjunto, sin abrir ningún diálogo de impresión ni tener que adjuntar nada a mano. La primera vez que se use va a pedir permiso de Google para enviar correo, además del permiso de Drive ya conocido.</p>
     <p>Si el presupuesto no tiene email cargado, si falla la generación del PDF, o si no se puede conectar con Google, el botón avisa y cae automáticamente al envío manual: abre Gmail con el texto ya completado, para adjuntar el PDF a mano (📎) antes de enviar.</p>
     <div class="warning">⚠️ Es posible que los primeros envíos caigan en la carpeta de Spam del destinatario — es normal en cualquier cuenta que recién empieza a mandar correo automático. Conviene avisarle al cliente que revise esa carpeta y marque el mail como "No es spam" — a partir de ahí, los siguientes envíos deberían llegar bien.</div>
 
@@ -527,6 +527,13 @@
       <div class="changelog-entry">
       <div class="changelog-entry">
       <div class="changelog-entry">
+      <div class="changelog-entry">
+        <div class="changelog-version"><span class="v-num">v2.8</span><span class="changelog-tag tag-feature">feature</span></div>
+        <ul class="changelog-list">
+          <li>El PDF que se adjunta al email ahora usa un <b>diseño distinto, pensado para leerse en el celular</b>: una sola columna (nada de campos lado a lado), letra bastante más grande, y tamaño de hoja A5 en vez de A4 — se lee cómodo sin hacer zoom al abrirlo como adjunto en el teléfono. El botón "📄 PDF" (para imprimir o guardar desde la PC) no cambió — sigue con el diseño de siempre, en A4.</li>
+        </ul>
+      </div>
+
         <div class="changelog-version"><span class="v-num">v2.7</span><span class="changelog-tag tag-fix">fix</span></div>
         <ul class="changelog-list">
           <li>El email enviado por Gmail con el PDF adjunto llegaba a destino pero caía en Spam — le faltaba el encabezado <code>Date</code>, que varios filtros de correo exigen. Se agregó ese encabezado y un <code>Reply-To</code> con el email de la empresa (si está cargado en Configuración). No hay garantía total de que nunca caiga en spam — es habitual que los primeros envíos automáticos de una cuenta caigan ahí hasta que el destinatario marque alguno como "No es spam".</li>
