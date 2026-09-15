@@ -1342,7 +1342,7 @@ function exportarJSON(){
 // GOOGLE DRIVE — backup real, mismo patrón que Control Financiero
 // ═══════════════════════════════════════════════════════════════
 const GDRIVE_CLIENT_ID='1049169592532-is5j1j4s1bmgrc9tsq48slrgul8fbj17.apps.googleusercontent.com';
-const GDRIVE_SCOPE='https://www.googleapis.com/auth/drive.file';
+const GDRIVE_SCOPE='https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/gmail.send';
 const VSS_DRIVE_FOLDER='RiegoAdaptativo';
 const VSS_GTOKEN_KEY='riego_gtoken';
 const VSS_GTOKEN_EXP_KEY='riego_gtoken_exp';
@@ -1719,7 +1719,7 @@ const aprBtn=p.estado==='Aprobado'&&!clienteYaCreado?'<button class="btn btn-sm 
         '<button class="btn btn-sm" onclick="abrirEditorPres('+p.id+')">✏️ Editar</button>'+
         '<button class="btn btn-sm" onclick="verPresupuesto('+p.id+')">👁️ Ver</button>'+
         '<button class="btn btn-sm btn-p" onclick="generarPDF('+p.id+')">📄 PDF</button>'+
-        '<button class="btn btn-sm" onclick="enviarEmailPres('+p.id+')" title="Enviar por email" style="color:var(--blue);border-color:var(--blue)">📧 Email</button>'+
+        '<button class="btn btn-sm" onclick="enviarEmailPresConAdjunto('+p.id+')" title="Enviar por email con el PDF adjunto" style="color:var(--blue);border-color:var(--blue)">📧 Email</button>'+
         aprBtn+
         '<button class="btn btn-sm" style="color:var(--red)" onclick="eliminarPres('+p.id+')">🗑️</button>'+
       '</td>'+
@@ -1868,7 +1868,7 @@ const aprBtn=p.estado==='Aprobado'&&!cliExiste?'<button class="btn btn-sm btn-g"
         ['Borrador','Enviado','Aprobado','Rechazado'].map(function(e){return '<option'+(p.estado===e?' selected':'')+'>'+e+'</option>';}).join('')+
       '</select>'+
       '<button class="btn btn-sm btn-p" onclick="generarPDF('+p.id+');cerrarModal()">📄 PDF</button>'+
-      '<button class="btn btn-sm" style="color:var(--blue)" onclick="enviarEmailPres('+p.id+');cerrarModal()">📧 Email</button>'+
+      '<button class="btn btn-sm" style="color:var(--blue)" onclick="enviarEmailPresConAdjunto('+p.id+');cerrarModal()">📧 Email</button>'+
       aprBtn+
     '</div>'+
     '<div class="fg2">'+
@@ -1897,7 +1897,7 @@ const aprBtn=p.estado==='Aprobado'&&!cliExiste?'<button class="btn btn-sm btn-g"
 }
 
 
-function generarPDF(id){
+function generarPDFHTMLPres(id){
   const p=DB.presupuestos.find(function(x){return x.id===id;});
   if(!p)return;
 
@@ -2032,8 +2032,14 @@ function generarPDF(id){
       '<div style="text-align:right">'+num+' · Emitido por: '+(p.tecnico||'—')+'<br>Válido '+( p.validez||15)+' días · Vence: '+vence+'</div>'+
     '</div>';
 
+  return {css:CSS, body:body, num:num};
+}
+
+function generarPDF(id){
+  const r=generarPDFHTMLPres(id);
+  if(!r) return;
   const w=window.open('','_blank');
-  w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Presupuesto '+num+'</title><style>'+CSS+'</style></head><body>'+body+'</body></html>');
+  w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Presupuesto '+r.num+'</title><style>'+r.css+'</style></head><body>'+r.body+'</body></html>');
   w.document.close();
 }
 
@@ -3191,6 +3197,145 @@ function pdfOrden(id){
 }
 
 
+
+// =======================================================
+// ENVÍO DE PRESUPUESTO POR GMAIL CON EL PDF ADJUNTO (automático, sin diálogo de impresión)
+// =======================================================
+
+// Genera el PDF real del presupuesto (offscreen, mismo diseño que "📄 PDF") y devuelve
+// el contenido en base64 vía callback. callback(null) si algo falla.
+function generarPresupuestoPDFBase64(id, callback){
+  const r = generarPDFHTMLPres(id);
+  if(!r){ callback(null); return; }
+  if(typeof html2canvas==='undefined' || typeof window.jspdf==='undefined'){
+    callback(null); return;
+  }
+  var cont = document.createElement('div');
+  cont.style.cssText = 'position:fixed;left:-99999px;top:0;width:800px;background:#fff;';
+  var styleTag = document.createElement('style');
+  styleTag.textContent = r.css;
+  cont.appendChild(styleTag);
+  var bodyDiv = document.createElement('div');
+  bodyDiv.innerHTML = r.body;
+  cont.appendChild(bodyDiv);
+  document.body.appendChild(cont);
+
+  html2canvas(cont, {scale:2, useCORS:true, backgroundColor:'#ffffff'}).then(function(canvas){
+    if(document.body.contains(cont)) document.body.removeChild(cont);
+    var imgData = canvas.toDataURL('image/jpeg', 0.92);
+    var jsPDFCtor = window.jspdf.jsPDF;
+    var pdf = new jsPDFCtor('p','mm','a4');
+    var pageWidth = pdf.internal.pageSize.getWidth();
+    var pageHeight = pdf.internal.pageSize.getHeight();
+    var imgWidth = pageWidth;
+    var imgHeight = canvas.height * imgWidth / canvas.width;
+    var heightLeft = imgHeight, position = 0;
+    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+    while(heightLeft > 0){
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+    callback(pdf.output('datauristring').split(',')[1]);
+  }).catch(function(e){
+    console.error('Error generando PDF para email', e);
+    if(document.body.contains(cont)) document.body.removeChild(cont);
+    callback(null);
+  });
+}
+
+function mimeEncodeSubject(s){
+  return '=?UTF-8?B?'+btoa(unescape(encodeURIComponent(s)))+'?=';
+}
+function base64UrlEncode(binaryStr){
+  return btoa(binaryStr).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+// Envía el presupuesto por Gmail con el PDF ya adjunto, sin pasos manuales.
+// Si algo falla (PDF, permisos, red), cae al flujo manual de siempre (enviarEmailPres).
+function enviarEmailPresConAdjunto(id){
+  const p=DB.presupuestos.find(function(x){return x.id===id;});
+  if(!p) return;
+  if(!p.email){
+    if(!confirm('Este presupuesto no tiene email cargado. ¿Usar el envío manual (Gmail se abre sin adjuntar)?')) return;
+    enviarEmailPres(id);
+    return;
+  }
+
+  generarPresupuestoPDFBase64(id, function(pdfBase64){
+    if(!pdfBase64){
+      alert('No se pudo generar el PDF automáticamente. Se abre el envío manual como respaldo.');
+      enviarEmailPres(id);
+      return;
+    }
+    vssDriveGetToken(function(token){
+      if(!token){
+        alert('No se pudo conectar con Google. Se abre el envío manual como respaldo.');
+        enviarEmailPres(id);
+        return;
+      }
+      const cfg = DB.config || {};
+      const num = presNum(p);
+      const empresa = cfg.empresa || 'Riego Adaptativo';
+      const firma = cfg.firma || empresa;
+      const asunto = 'Presupuesto ' + num + ' - ' + empresa;
+      const cuerpo =
+        'Estimado/a ' + p.nombre + ',\r\n\r\n' +
+        'Le enviamos adjunto el presupuesto ' + num + ' correspondiente a ' + (getLineaPres(p)?getLineaPres(p).nombre:'su sistema') + '.\r\n\r\n' +
+        'Validez: ' + (p.validez||15) + ' dias corridos.\r\n\r\n' +
+        'Ante cualquier consulta no dude en contactarnos.\r\n\r\n' +
+        'Saludos cordiales,\r\n' + firma +
+        (cfg.tel ? '\r\nTel: ' + cfg.tel : '') +
+        (cfg.email ? '\r\n' + cfg.email : '');
+
+      const boundary = 'riego_boundary_' + Date.now();
+      const nombreArchivo = 'Presupuesto_' + num.replace(/[^a-zA-Z0-9]/g,'_') + '.pdf';
+
+      var mensaje =
+        'To: ' + p.email + '\r\n' +
+        'Subject: ' + mimeEncodeSubject(asunto) + '\r\n' +
+        'MIME-Version: 1.0\r\n' +
+        'Content-Type: multipart/mixed; boundary="' + boundary + '"\r\n\r\n' +
+        '--' + boundary + '\r\n' +
+        'Content-Type: text/plain; charset="UTF-8"\r\n\r\n' +
+        cuerpo + '\r\n\r\n' +
+        '--' + boundary + '\r\n' +
+        'Content-Type: application/pdf; name="' + nombreArchivo + '"\r\n' +
+        'Content-Disposition: attachment; filename="' + nombreArchivo + '"\r\n' +
+        'Content-Transfer-Encoding: base64\r\n\r\n' +
+        pdfBase64.replace(/(.{76})/g, '$1\r\n') + '\r\n' +
+        '--' + boundary + '--';
+
+      var utf8Bytes = new TextEncoder().encode(mensaje);
+      var binaryStr = '';
+      for(var i=0;i<utf8Bytes.length;i++) binaryStr += String.fromCharCode(utf8Bytes[i]);
+      var raw = base64UrlEncode(binaryStr);
+
+      fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ raw: raw })
+      }).then(function(resp){
+        if(resp.ok){
+          alert('✅ Presupuesto enviado por email con el PDF adjunto.');
+          if(confirm('¿Marcar el presupuesto como Enviado?')){
+            p.estado='Enviado'; save(); renderPresupuestos();
+          }
+        } else {
+          resp.text().then(function(t){ console.error('Gmail send error', t); });
+          alert('No se pudo enviar por Gmail automáticamente. Se abre el envío manual como respaldo.');
+          enviarEmailPres(id);
+        }
+      }).catch(function(e){
+        console.error('Error enviando por Gmail', e);
+        alert('No se pudo enviar por Gmail automáticamente. Se abre el envío manual como respaldo.');
+        enviarEmailPres(id);
+      });
+    });
+  });
+}
 
 function enviarEmailPres(id){
   const p=DB.presupuestos.find(function(x){return x.id===id;});
@@ -7641,7 +7786,7 @@ function abrirEditorPres(id){
       "<textarea style='padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;width:100%;min-height:56px;font-family:inherit'" +"oninput='updPres("+id+",\"obsInternas\",this.value)'>"+(p.obsInternas||'')+"</textarea></div>"+
     '<div style="display:flex;gap:8px;margin-top:8px">'+
       '<button class="btn btn-p" style="flex:1" onclick="generarPDF('+id+');cerrarModal()">PDF</button>'+
-      '<button class="btn" style="flex:1;color:var(--blue);border-color:var(--blue)" onclick="enviarEmailPres('+id+');cerrarModal()">Email</button>'+
+      '<button class="btn" style="flex:1;color:var(--blue);border-color:var(--blue)" onclick="enviarEmailPresConAdjunto('+id+');cerrarModal()">Email</button>'+
       (p.estado==='Aprobado'&&!clienteYaActivado?'<button class="btn btn-g" style="flex:1" onclick="convertirCliente('+id+');cerrarModal()">Cliente Activo</button>':'')+
       (clienteYaActivado?'<span style="flex:1;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--green)">✔ Cliente: '+clienteYaActivado.nombre+'</span>':'')+
     '</div>'
