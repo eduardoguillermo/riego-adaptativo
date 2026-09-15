@@ -1271,13 +1271,15 @@ async function renderBrochures(){
   }
   archivos.sort(function(a,b){return a.localeCompare(b,'es');});
   if(!archivos.length){ el.innerHTML = '<div class="empty">Sin archivos todavía.</div>'; return; }
+  var seRenderizaLista = ['pdf','png','jpg','jpeg','gif','webp','svg','txt'];
   el.innerHTML = archivos.map(function(nombre){
     var ext = (nombre.split('.').pop()||'').toLowerCase();
     var icono = (ext==='ppt'||ext==='pptx') ? '📽️' : (ext==='pdf' ? '📄' : (ext==='doc'||ext==='docx') ? '📝' : '📎');
+    var labelBtn = seRenderizaLista.indexOf(ext)!==-1 ? '👁️ Abrir' : '⬇️ Descargar';
     return '<div class="brochure-item" style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--border)">'+
       '<div>'+icono+' '+nombre+'</div>'+
       '<div style="display:flex;gap:6px">'+
-        '<button class="btn btn-sm" onclick="vssAbrirBrochure(\''+nombre.replace(/'/g,"\\'")+'\')">👁️ Abrir</button>'+
+        '<button class="btn btn-sm" onclick="vssAbrirBrochure(\''+nombre.replace(/'/g,"\\'")+'\')">'+labelBtn+'</button>'+
         '<button class="btn btn-sm" style="color:var(--red)" onclick="vssBorrarBrochure(\''+nombre.replace(/'/g,"\\'")+'\')">🗑️</button>'+
       '</div>'+
     '</div>';
@@ -1290,7 +1292,23 @@ async function vssAbrirBrochure(nombre){
     const fileHandle = await handle.getFileHandle(nombre);
     const file = await fileHandle.getFile();
     const url = URL.createObjectURL(file);
-    window.open(url, '_blank');
+    var ext = (nombre.split('.').pop()||'').toLowerCase();
+    // El navegador solo puede "renderizar" unos pocos formatos (PDF, imágenes, texto).
+    // Para el resto (pptx, docx, xlsx, etc.) no hay forma de abrir la app nativa directo
+    // por seguridad del navegador — lo más cercano es forzar la descarga con el nombre
+    // y extensión correctos, así el aviso de "Abrir archivo" del navegador lanza la app
+    // correspondiente con un clic.
+    var seRenderizaEnElNavegador = ['pdf','png','jpg','jpeg','gif','webp','svg','txt'].indexOf(ext) !== -1;
+    if(seRenderizaEnElNavegador){
+      window.open(url, '_blank');
+    } else {
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = nombre;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
     setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
   } catch(e){ alert('No se pudo abrir el archivo: '+e.message); }
 }
