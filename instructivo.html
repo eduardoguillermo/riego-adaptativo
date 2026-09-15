@@ -129,7 +129,7 @@
 
 <div class="layout">
 <nav class="sidebar">
-  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v2.2</p></div></div>
+  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v2.3</p></div></div>
 
   <div class="section-label">Introducción</div>
   <a href="#intro">🏠 ¿Qué es esta app?</a>
@@ -181,7 +181,7 @@
     <h1>💧 Riego Adaptativo</h1>
     <p>Manual del sistema administrativo — ciclo completo del negocio, de presupuesto a mantenimiento</p>
     <div class="hero-badges">
-      <span class="badge badge-red">✓ v2.2</span>
+      <span class="badge badge-red">✓ v2.3</span>
       <span class="badge badge-blue">✓ Sin servidor</span>
       <span class="badge badge-amber">✓ Datos locales</span>
     </div>
@@ -530,6 +530,13 @@
 
       <div class="changelog-entry">
       <div class="changelog-entry">
+      <div class="changelog-entry">
+        <div class="changelog-version"><span class="v-num">v2.3</span><span class="changelog-tag tag-fix">fix</span></div>
+        <ul class="changelog-list">
+          <li>"🚪 Salir" mostraba "⏳ guardando..." / "⏳ sincronizando..." para la carpeta local y Google Drive, pero cerraba la ventana enseguida — el resultado real nunca llegaba a verse. Ahora espera a que cada paso termine de verdad antes de mostrar el resumen y cerrar (mismo comportamiento que Control Financiero).</li>
+        </ul>
+      </div>
+
         <div class="changelog-version"><span class="v-num">v2.2</span><span class="changelog-tag tag-fix">fix</span></div>
         <ul class="changelog-list">
           <li>Los materiales y movimientos creados desde el escáner de código de barras tienen un ID de texto (a diferencia de los creados en la PC, que son numéricos) — varios lugares de Catálogo, Movimientos, kits de línea de producto y kit base de instalación asumían que el ID siempre era un número, lo que rompía la edición y el borrado de esos registros, y en algunos casos generaba un botón inválido directamente. Corregido con una búsqueda que compara por igual sin importar el tipo, en todos los puntos donde se selecciona o referencia un componente o un movimiento de stock.</li>
