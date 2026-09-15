@@ -129,7 +129,7 @@
 
 <div class="layout">
 <nav class="sidebar">
-  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v3.2</p></div></div>
+  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v3.3</p></div></div>
 
   <div class="section-label">Introducción</div>
   <a href="#intro">🏠 ¿Qué es esta app?</a>
@@ -181,7 +181,7 @@
     <h1>💧 Riego Adaptativo</h1>
     <p>Manual del sistema administrativo — ciclo completo del negocio, de presupuesto a mantenimiento</p>
     <div class="hero-badges">
-      <span class="badge badge-red">✓ v3.2</span>
+      <span class="badge badge-red">✓ v3.3</span>
       <span class="badge badge-blue">✓ Sin servidor</span>
       <span class="badge badge-amber">✓ Datos locales</span>
     </div>
@@ -248,7 +248,7 @@
       <div><div class="section-title">Brochures</div><div class="section-subtitle">Presentaciones y material comercial, en una carpeta propia de tu PC</div></div>
     </div>
     <p>"📂 Elegir carpeta" vincula una carpeta real de tu computadora — la que uses para guardar PPTs, catálogos en PDF, fichas técnicas, etc. Una vez vinculada, la lista muestra todos los archivos que haya ahí, con un ícono según el tipo (📽️ PowerPoint, 📄 PDF, 📝 Word, 📎 otros).</p>
-    <p>"👁️ Abrir" abre el archivo en una pestaña nueva del navegador, tal cual está guardado. "📤 Subir archivo" deja elegir cualquier archivo de la PC y lo copia directo a la carpeta vinculada — sin tener que ir al explorador de archivos. "🗑️" borra el archivo real de la carpeta, no solo de la lista.</p>
+    <p>El botón de cada archivo se adapta a lo que el navegador puede hacer con él: para PDFs e imágenes dice <b>"👁️ Abrir"</b> y lo muestra en una pestaña nueva. Para PPT, Word, Excel y el resto — que el navegador no puede mostrar — dice <b>"⬇️ Descargar"</b>: los descarga con su nombre y extensión reales, y desde el aviso de descarga del navegador se abren con un clic en su aplicación de siempre (PowerPoint, Word, etc.). Ningún sitio puede lanzar esas aplicaciones directo por seguridad del navegador — este es el camino más corto posible. "📤 Subir archivo" deja elegir cualquier archivo de la PC y lo copia directo a la carpeta vinculada — sin tener que ir al explorador de archivos. "🗑️" borra el archivo real de la carpeta, no solo de la lista.</p>
     <div class="note">📌 Es una carpeta separada de la de <a href="#backup">Backup / Restaurar</a> — se puede vincular una distinta para cada una, o la misma si preferís. Requiere un navegador con soporte de File System Access (ver la nota en <a href="#backup">Backup</a> sobre Brave).</div>
   </section>
 
@@ -544,6 +544,13 @@
       <div class="changelog-entry">
       <div class="changelog-entry">
       <div class="changelog-entry">
+      <div class="changelog-entry">
+        <div class="changelog-version"><span class="v-num">v3.3</span><span class="changelog-tag tag-fix">fix</span></div>
+        <ul class="changelog-list">
+          <li>En Brochures, los PPT/Word/Excel abrían como una pestaña rota o descargaban sin nombre — el navegador no sabe mostrarlos, a diferencia de un PDF. Ahora esos archivos se descargan directo con su nombre y extensión reales, y el botón dice "⬇️ Descargar" en vez de "👁️ Abrir" para dejarlo claro. Desde el aviso de descarga del navegador se abren con un clic en la app correspondiente (no hay forma de saltarse ese paso — ningún sitio puede lanzar una aplicación de escritorio directo, por seguridad).</li>
+        </ul>
+      </div>
+
         <div class="changelog-version"><span class="v-num">v3.2</span><span class="changelog-tag tag-feature">feature</span></div>
         <ul class="changelog-list">
           <li><b>Nueva sección Brochures</b> (dentro de Comercial): vincula una carpeta local de la PC para ver, abrir y subir presentaciones y material comercial (PPTs, PDFs, etc.) directo desde la app — mismo mecanismo de carpeta local que ya usa Backup, pero como carpeta independiente.</li>
