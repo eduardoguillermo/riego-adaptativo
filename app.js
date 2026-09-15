@@ -1146,7 +1146,7 @@ async function vssPermisoOtorgado(handle){
 }
 async function vssSeleccionarCarpeta(){
   if(!('showDirectoryPicker' in window)){
-    alert('Tu navegador no soporta la selección de carpeta local. Usá Chrome o Brave.');
+    alert('Tu navegador no soporta la selección de carpeta local.\n\nSi usás Chrome o Edge, debería funcionar directo.\n\nSi usás Brave: esta función viene desactivada por defecto (Brave la bloquea por privacidad). Para activarla: entrá a brave://flags, buscá "File System Access API", ponela en "Enabled" y reiniciá el navegador.\n\nSi preferís no tocar flags, el backup a Google Drive funciona igual sin este permiso.');
     return;
   }
   try {
