@@ -129,7 +129,7 @@
 
 <div class="layout">
 <nav class="sidebar">
-  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v3.0</p></div></div>
+  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v3.1</p></div></div>
 
   <div class="section-label">Introducción</div>
   <a href="#intro">🏠 ¿Qué es esta app?</a>
@@ -180,7 +180,7 @@
     <h1>💧 Riego Adaptativo</h1>
     <p>Manual del sistema administrativo — ciclo completo del negocio, de presupuesto a mantenimiento</p>
     <div class="hero-badges">
-      <span class="badge badge-red">✓ v3.0</span>
+      <span class="badge badge-red">✓ v3.1</span>
       <span class="badge badge-blue">✓ Sin servidor</span>
       <span class="badge badge-amber">✓ Datos locales</span>
     </div>
@@ -193,7 +193,7 @@
       <div><div class="section-title">¿Qué es esta app?</div><div class="section-subtitle">Descripción general</div></div>
     </div>
     <p>Es el sistema administrativo de Riego Adaptativo: cubre todo el ciclo del negocio, desde el relevamiento y presupuesto de un cliente nuevo hasta la fabricación del equipo, su instalación y el mantenimiento posterior. Es una PWA vanilla JS sin servidor — todo vive en el navegador (<code>localStorage</code>) y se respalda manualmente en JSON.</p>
-    <p>El menú lateral agrupa los módulos por área: <b>Comercial</b> (presupuestos, gestión económica, actas), <b>Clientes</b>, <b>Finanzas</b>, <b>Logística</b> (stock y compras), <b>Fabricación</b>, <b>Instalaciones</b>, <b>Mantenimiento</b>, <b>Análisis</b> (reportes) y <b>Configuración/Datos</b>.</p>
+    <p>El menú lateral agrupa los módulos por área: <b>Comercial</b> (presupuestos, gestión económica, actas), <b>Clientes</b>, <b>Finanzas</b>, <b>Logística</b> (stock y compras), <b>Fabricación</b>, <b>Instalaciones</b>, <b>Mantenimiento</b>, <b>Análisis</b> (reportes) y <b>Configuración/Respaldos</b>.</p>
     <div class="tip">💡 El buscador global de la barra superior ("🔍 Buscar clientes, presupuestos, componentes...") busca en simultáneo por todos esos módulos — es el atajo más rápido para llegar a una ficha puntual sin navegar por el menú.</div>
   </section>
 
@@ -530,6 +530,13 @@
       <div class="changelog-entry">
       <div class="changelog-entry">
       <div class="changelog-entry">
+      <div class="changelog-entry">
+        <div class="changelog-version"><span class="v-num">v3.1</span><span class="changelog-tag tag-fix">fix</span></div>
+        <ul class="changelog-list">
+          <li>Renombrado el grupo de menú "Datos" a "Respaldos" — es más claro, ya que ahí solo vive Backup / Restaurar.</li>
+        </ul>
+      </div>
+
         <div class="changelog-version"><span class="v-num">v3.0</span><span class="changelog-tag tag-fix">fix</span></div>
         <ul class="changelog-list">
           <li>El aviso de "Carpeta local" decía "Usá Chrome o Brave" cuando el navegador no soporta la función — pero en Brave esta función viene <b>desactivada a propósito</b> por privacidad, no es que falte. El mensaje ahora lo explica bien y da el camino real: activarla en <code>brave://flags</code> buscando "File System Access API", o simplemente usar el backup a Google Drive (que no depende de esto).</li>
