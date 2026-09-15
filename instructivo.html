@@ -129,7 +129,7 @@
 
 <div class="layout">
 <nav class="sidebar">
-  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v2.3</p></div></div>
+  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v2.4</p></div></div>
 
   <div class="section-label">Introducción</div>
   <a href="#intro">🏠 ¿Qué es esta app?</a>
@@ -181,7 +181,7 @@
     <h1>💧 Riego Adaptativo</h1>
     <p>Manual del sistema administrativo — ciclo completo del negocio, de presupuesto a mantenimiento</p>
     <div class="hero-badges">
-      <span class="badge badge-red">✓ v2.3</span>
+      <span class="badge badge-red">✓ v2.4</span>
       <span class="badge badge-blue">✓ Sin servidor</span>
       <span class="badge badge-amber">✓ Datos locales</span>
     </div>
@@ -232,7 +232,8 @@
     <div class="note">📌 Los relevamientos importados no traen línea de producto asignada todavía — la app móvil de relevamiento no maneja líneas de producto, solo releva datos del terreno — hay que elegirla a mano en el presupuesto una vez importado.</div>
 
     <h2>PDF y envío por email</h2>
-    <p>"📄 PDF" abre el presupuesto en una pestaña nueva, lista para "🖨️ Imprimir / Guardar PDF". "📧 Email" abre Gmail con destinatario, asunto y cuerpo ya completados — pero <b>no adjunta el PDF</b>, eso ningún sitio puede hacerlo por razones de seguridad del navegador. El flujo correcto es generar y guardar el PDF primero, y después usar "Email" para adjuntarlo a mano (📎) antes de enviar. El botón recuerda este paso con un aviso cada vez que se usa.</p>
+    <p>"📄 PDF" abre el presupuesto en una pestaña nueva, lista para "🖨️ Imprimir / Guardar PDF" — útil para revisarlo o guardarlo a mano. "📧 Email" hace algo distinto: genera el PDF real en el momento y lo envía directo por Gmail con el archivo ya adjunto, sin abrir ningún diálogo de impresión ni tener que adjuntar nada a mano. La primera vez que se use va a pedir permiso de Google para enviar correo, además del permiso de Drive ya conocido.</p>
+    <p>Si el presupuesto no tiene email cargado, si falla la generación del PDF, o si no se puede conectar con Google, el botón avisa y cae automáticamente al envío manual: abre Gmail con el texto ya completado, para adjuntar el PDF a mano (📎) antes de enviar.</p>
 
     <h2>Cliente Activo</h2>
     <p>Un presupuesto <b>Aprobado</b> se convierte en cliente con el botón "👤 Cliente Activo": pasa a la pantalla de Alta con nombre, teléfono, dirección, email y ambientes ya cargados — solo falta completar lote, MAC, PIN OTA y versión instalada. Una vez convertido, el vínculo con el cliente ("✔ Cliente: nombre") se sigue mostrando aunque el presupuesto cambie de estado más adelante.</p>
@@ -531,6 +532,14 @@
       <div class="changelog-entry">
       <div class="changelog-entry">
       <div class="changelog-entry">
+      <div class="changelog-entry">
+        <div class="changelog-version"><span class="v-num">v2.4</span><span class="changelog-tag tag-feature">feature</span></div>
+        <ul class="changelog-list">
+          <li><b>Envío de presupuesto por email con el PDF adjunto automático</b>: "📧 Email" ahora genera el PDF real en el momento (con jsPDF + html2canvas, mismo diseño que "📄 PDF" pero sin abrir ningún diálogo de impresión) y lo manda directo por Gmail, ya adjunto, sin pasos manuales. Si el presupuesto no tiene email cargado, si falla la generación del PDF, o si no se puede conectar con Google, cae automáticamente al envío manual de siempre (abrir Gmail con el texto listo para adjuntar a mano).</li>
+          <li>El login de Google ahora pide también permiso de envío de Gmail (antes solo pedía Drive) — la primera vez que se use esta función va a aparecer un cartel de permisos nuevo, aunque ya se haya conectado Drive antes.</li>
+        </ul>
+      </div>
+
         <div class="changelog-version"><span class="v-num">v2.3</span><span class="changelog-tag tag-fix">fix</span></div>
         <ul class="changelog-list">
           <li>"🚪 Salir" mostraba "⏳ guardando..." / "⏳ sincronizando..." para la carpeta local y Google Drive, pero cerraba la ventana enseguida — el resultado real nunca llegaba a verse. Ahora espera a que cada paso termine de verdad antes de mostrar el resumen y cerrar (mismo comportamiento que Control Financiero).</li>
