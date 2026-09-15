@@ -118,7 +118,6 @@ function cerrarSplash(){
   <div class="ns collapsible" onclick="toggleNav(this)">🔩 Instalaciones ▸</div>
   <div class="nav-section-items">
   <div class="ni" id="nav-instalaciones" onclick="goTo('instalaciones')"><span class="ni-icon">📋</span>Pedidos de instalación</div>
-  <div class="ni" id="nav-kitinst" onclick="goTo('kitinst')"><span class="ni-icon">🧰</span>Kit base instalación</div>
 
   </div>
   <div class="ns collapsible" onclick="toggleNav(this)">🛠️ Mantenimiento ▸</div>
@@ -341,29 +340,6 @@ function cerrarSplash(){
               <th>Técnico</th><th>Fecha tent.</th><th>Estado</th><th>Acciones</th>
             </tr></thead>
             <tbody id="tbody-inst"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- KIT BASE INSTALACION -->
-    <div class="panel" id="panel-kitinst">
-      <div class="sbar">
-        <div class="card-title" style="font-size:14px;font-weight:700">🧰 Kit base de instalación</div>
-        <button class="btn btn-p" onclick="modalKitInstEditar()">✏️ Editar kit</button>
-      </div>
-      <div class="card">
-        <div class="card-head">
-          <div class="card-title">Materiales base para toda instalación</div>
-          <div style="font-size:11px;color:var(--text2)" id="kitinst-version"></div>
-        </div>
-        <div class="twrap">
-          <table>
-            <thead><tr>
-              <th>Código</th><th>Descripción</th><th style="text-align:center">Cantidad</th>
-              <th>Unidad</th><th style="text-align:center">Stock</th><th>Acciones</th>
-            </tr></thead>
-            <tbody id="tbody-kitinst"></tbody>
           </table>
         </div>
       </div>
