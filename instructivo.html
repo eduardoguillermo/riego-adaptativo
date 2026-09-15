@@ -129,7 +129,7 @@
 
 <div class="layout">
 <nav class="sidebar">
-  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v3.1</p></div></div>
+  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v3.2</p></div></div>
 
   <div class="section-label">Introducción</div>
   <a href="#intro">🏠 ¿Qué es esta app?</a>
@@ -137,6 +137,7 @@
 
   <div class="section-label">Comercial</div>
   <a href="#presupuestos">📄 Presupuestos</a>
+  <a href="#brochures">📽️ Brochures</a>
   <a href="#gestion">💰 Gestión económica</a>
   <a href="#actas">📋 Actas de conformidad</a>
 
@@ -180,7 +181,7 @@
     <h1>💧 Riego Adaptativo</h1>
     <p>Manual del sistema administrativo — ciclo completo del negocio, de presupuesto a mantenimiento</p>
     <div class="hero-badges">
-      <span class="badge badge-red">✓ v3.1</span>
+      <span class="badge badge-red">✓ v3.2</span>
       <span class="badge badge-blue">✓ Sin servidor</span>
       <span class="badge badge-amber">✓ Datos locales</span>
     </div>
@@ -238,6 +239,17 @@
     <h2>Cliente Activo</h2>
     <p>Un presupuesto <b>Aprobado</b> se convierte en cliente con el botón "👤 Cliente Activo": pasa a la pantalla de Alta con nombre, teléfono, dirección, email y ambientes ya cargados — solo falta completar lote, MAC, PIN OTA y versión instalada. Una vez convertido, el vínculo con el cliente ("✔ Cliente: nombre") se sigue mostrando aunque el presupuesto cambie de estado más adelante.</p>
     <div class="note">📌 Un presupuesto aprobado es también el punto de entrada de <a href="#gestion">Gestión económica</a> y de una <a href="#fabricacion">orden de trabajo "desde presupuesto"</a> — todo el circuito comercial cuelga de ese estado.</div>
+  </section>
+
+  <!-- BROCHURES -->
+  <section class="section" id="brochures">
+    <div class="section-header">
+      <span class="section-icon">📽️</span>
+      <div><div class="section-title">Brochures</div><div class="section-subtitle">Presentaciones y material comercial, en una carpeta propia de tu PC</div></div>
+    </div>
+    <p>"📂 Elegir carpeta" vincula una carpeta real de tu computadora — la que uses para guardar PPTs, catálogos en PDF, fichas técnicas, etc. Una vez vinculada, la lista muestra todos los archivos que haya ahí, con un ícono según el tipo (📽️ PowerPoint, 📄 PDF, 📝 Word, 📎 otros).</p>
+    <p>"👁️ Abrir" abre el archivo en una pestaña nueva del navegador, tal cual está guardado. "📤 Subir archivo" deja elegir cualquier archivo de la PC y lo copia directo a la carpeta vinculada — sin tener que ir al explorador de archivos. "🗑️" borra el archivo real de la carpeta, no solo de la lista.</p>
+    <div class="note">📌 Es una carpeta separada de la de <a href="#backup">Backup / Restaurar</a> — se puede vincular una distinta para cada una, o la misma si preferís. Requiere un navegador con soporte de File System Access (ver la nota en <a href="#backup">Backup</a> sobre Brave).</div>
   </section>
 
   <!-- GESTION ECONOMICA -->
@@ -531,6 +543,13 @@
       <div class="changelog-entry">
       <div class="changelog-entry">
       <div class="changelog-entry">
+      <div class="changelog-entry">
+        <div class="changelog-version"><span class="v-num">v3.2</span><span class="changelog-tag tag-feature">feature</span></div>
+        <ul class="changelog-list">
+          <li><b>Nueva sección Brochures</b> (dentro de Comercial): vincula una carpeta local de la PC para ver, abrir y subir presentaciones y material comercial (PPTs, PDFs, etc.) directo desde la app — mismo mecanismo de carpeta local que ya usa Backup, pero como carpeta independiente.</li>
+        </ul>
+      </div>
+
         <div class="changelog-version"><span class="v-num">v3.1</span><span class="changelog-tag tag-fix">fix</span></div>
         <ul class="changelog-list">
           <li>Renombrado el grupo de menú "Datos" a "Respaldos" — es más claro, ya que ahí solo vive Backup / Restaurar.</li>
