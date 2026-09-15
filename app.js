@@ -220,10 +220,10 @@ function syncStockDesdeDrive(mostrarAlert){
 // NAV
 // =======================================================
 let curCid=null, curSub='datos';
-const PANELS=['clientes','alta','detalle','versiones','tipos','backup','presupuestos','stock','catalogo','movimientos','ordenes','config','reportes','proveedores','gestion','fondos','fabricacion','kit','instalaciones','actas','mantenimientos'];
+const PANELS=['clientes','alta','detalle','versiones','tipos','backup','presupuestos','brochures','stock','catalogo','movimientos','ordenes','config','reportes','proveedores','gestion','fondos','fabricacion','kit','instalaciones','actas','mantenimientos'];
 
 // Mapa de panel -> ancla en instructivo.html (usado por el botón de ayuda contextual "?")
-const ANCLAS_AYUDA={clientes:'clientes',alta:'clientes',detalle:'ficha',versiones:'versiones',tipos:'tipos',backup:'backup',presupuestos:'presupuestos',stock:'stock',catalogo:'stock',movimientos:'movimientos',ordenes:'ordenes',config:'config',reportes:'reportes',proveedores:'proveedores',gestion:'gestion',fondos:'fondos',fabricacion:'fabricacion',kit:'kit',instalaciones:'instalaciones',actas:'actas',mantenimientos:'mantenimientos'};
+const ANCLAS_AYUDA={clientes:'clientes',alta:'clientes',detalle:'ficha',versiones:'versiones',tipos:'tipos',backup:'backup',presupuestos:'presupuestos',brochures:'brochures',stock:'stock',catalogo:'stock',movimientos:'movimientos',ordenes:'ordenes',config:'config',reportes:'reportes',proveedores:'proveedores',gestion:'gestion',fondos:'fondos',fabricacion:'fabricacion',kit:'kit',instalaciones:'instalaciones',actas:'actas',mantenimientos:'mantenimientos'};
 var _panelActual='clientes';
 function abrirAyudaPanel(){
   var ancla=ANCLAS_AYUDA[_panelActual]||'intro';
@@ -238,7 +238,7 @@ function goTo(p){
     const n=document.getElementById('nav-'+x);
     if(n) n.classList.toggle('on',x===p);
   });
-  const titles={clientes:'Clientes',alta:'Alta de cliente',detalle:'Ficha de cliente',versiones:'Versiones de software',tipos:'Tipos de sensor',backup:'Backup / Restaurar',presupuestos:'Presupuestos',stock:'Stock actual',catalogo:'Catálogo',movimientos:'Movimientos de stock',ordenes:'Órdenes de compra',fabricacion:'Órdenes de trabajo',kit:'Líneas de producto',instalaciones:'Pedidos de instalación',actas:'Actas de conformidad',mantenimientos:'Mantenimientos',fondos:'Movimiento de fondos',gestion:'Gestión económica',config:'Configuración',reportes:'Reportes',proveedores:'Proveedores'};
+  const titles={clientes:'Clientes',alta:'Alta de cliente',detalle:'Ficha de cliente',versiones:'Versiones de software',tipos:'Tipos de sensor',backup:'Backup / Restaurar',presupuestos:'Presupuestos',brochures:'Brochures',stock:'Stock actual',catalogo:'Catálogo',movimientos:'Movimientos de stock',ordenes:'Órdenes de compra',fabricacion:'Órdenes de trabajo',kit:'Líneas de producto',instalaciones:'Pedidos de instalación',actas:'Actas de conformidad',mantenimientos:'Mantenimientos',fondos:'Movimiento de fondos',gestion:'Gestión económica',config:'Configuración',reportes:'Reportes',proveedores:'Proveedores'};
   document.getElementById('ptitle').textContent=titles[p]||p;
   document.getElementById('tctx').textContent='';
   const pa=document.getElementById('pacts'); pa.innerHTML='';
@@ -256,6 +256,7 @@ function goTo(p){
   if(p==='actas') renderActas();
   if(p==='mantenimientos') renderMantenimientos();
   if(p==='presupuestos') renderPresupuestos();
+  if(p==='brochures') renderBrochures();
   if(p==='stock') renderStock();
   if(p==='catalogo') renderCatalogo();
   if(p==='movimientos') renderMovimientos();
@@ -1102,6 +1103,7 @@ async function vssSalir(){
 const VSS_FOLDER_DB    = 'riego-folder-db';
 const VSS_FOLDER_STORE = 'handles';
 const VSS_FOLDER_KEY   = 'carpeta';
+const VSS_FOLDER_KEY_BROCHURES = 'carpeta_brochures';
 const VSS_MAX_BK       = 7;
 
 function vssAbrirFolderDB(){
@@ -1112,20 +1114,22 @@ function vssAbrirFolderDB(){
     req.onerror = function(e){ rej(e.target.error); };
   });
 }
-async function vssGuardarHandle(handle){
+async function vssGuardarHandle(handle, key){
+  key = key || VSS_FOLDER_KEY;
   try {
     const db = await vssAbrirFolderDB();
     const tx = db.transaction(VSS_FOLDER_STORE, 'readwrite');
-    tx.objectStore(VSS_FOLDER_STORE).put(handle, VSS_FOLDER_KEY);
+    tx.objectStore(VSS_FOLDER_STORE).put(handle, key);
     await new Promise(function(res, rej){ tx.oncomplete = res; tx.onerror = rej; });
     db.close();
   } catch(e){ console.warn('vssGuardarHandle:', e); }
 }
-async function vssLeerHandle(){
+async function vssLeerHandle(key){
+  key = key || VSS_FOLDER_KEY;
   try {
     const db = await vssAbrirFolderDB();
     const tx = db.transaction(VSS_FOLDER_STORE, 'readonly');
-    const req = tx.objectStore(VSS_FOLDER_STORE).get(VSS_FOLDER_KEY);
+    const req = tx.objectStore(VSS_FOLDER_STORE).get(key);
     const handle = await new Promise(function(res, rej){ req.onsuccess=function(){res(req.result);}; req.onerror=rej; });
     db.close();
     return handle || null;
@@ -1215,6 +1219,120 @@ function vssMostrarBannerReauthCarpeta(handle){
       else alert('No se otorgó el permiso. Podés vincular la carpeta de nuevo con "📂 Elegir carpeta local".');
     } catch(e){ alert('Error al reautorizar: '+e.message); }
   };
+}
+
+// =======================================================
+// BROCHURES — carpeta local aparte, para ver/abrir y subir PPTs (u otros archivos)
+// =======================================================
+async function vssSeleccionarCarpetaBrochures(){
+  if(!('showDirectoryPicker' in window)){
+    alert('Tu navegador no soporta la selección de carpeta local.\n\nSi usás Chrome o Edge, debería funcionar directo.\n\nSi usás Brave: esta función viene desactivada por defecto (Brave la bloquea por privacidad). Para activarla: entrá a brave://flags, buscá "File System Access API", ponela en "Enabled" y reiniciá el navegador.');
+    return;
+  }
+  try {
+    const handle = await window.showDirectoryPicker({mode:'readwrite'});
+    await vssGuardarHandle(handle, VSS_FOLDER_KEY_BROCHURES);
+    window._vssFolderHandleBrochures = handle;
+    renderBrochures();
+    alert('📂 Carpeta vinculada: '+handle.name);
+  } catch(e){
+    if(e.name !== 'AbortError') console.warn('vssSeleccionarCarpetaBrochures:', e);
+  }
+}
+async function vssRestaurarCarpetaBrochures(){
+  try {
+    const handle = await vssLeerHandle(VSS_FOLDER_KEY_BROCHURES);
+    if(!handle) return;
+    const ok = await vssPermisoOtorgado(handle);
+    if(!ok) return; // se pide de nuevo recién cuando el usuario entra a la pantalla y toca algo
+    window._vssFolderHandleBrochures = handle;
+  } catch(e){ console.warn('vssRestaurarCarpetaBrochures:', e); }
+}
+async function renderBrochures(){
+  const el = document.getElementById('brochures-lista');
+  const st = document.getElementById('brochures-status');
+  if(!el) return;
+  const handle = window._vssFolderHandleBrochures;
+  if(!handle){
+    if(st){ st.textContent = '➖ No vinculada'; st.style.color = 'var(--text2)'; }
+    el.innerHTML = '<div class="empty">Elegí una carpeta para ver y subir archivos acá.</div>';
+    return;
+  }
+  const ok = await vssVerificarPermiso(handle);
+  if(!ok){
+    if(st){ st.textContent = '🔒 Necesita reautorización'; st.style.color = 'var(--amber)'; }
+    el.innerHTML = '<div class="empty">Tocá "📂 Elegir carpeta" para confirmar el acceso de nuevo.</div>';
+    return;
+  }
+  if(st){ st.textContent = '📁 Vinculada: '+handle.name; st.style.color = 'var(--green)'; }
+  const archivos = [];
+  for await (const entry of handle.values()){
+    if(entry.kind==='file') archivos.push(entry.name);
+  }
+  archivos.sort(function(a,b){return a.localeCompare(b,'es');});
+  if(!archivos.length){ el.innerHTML = '<div class="empty">Sin archivos todavía.</div>'; return; }
+  el.innerHTML = archivos.map(function(nombre){
+    var ext = (nombre.split('.').pop()||'').toLowerCase();
+    var icono = (ext==='ppt'||ext==='pptx') ? '📽️' : (ext==='pdf' ? '📄' : (ext==='doc'||ext==='docx') ? '📝' : '📎');
+    return '<div class="brochure-item" style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--border)">'+
+      '<div>'+icono+' '+nombre+'</div>'+
+      '<div style="display:flex;gap:6px">'+
+        '<button class="btn btn-sm" onclick="vssAbrirBrochure(\''+nombre.replace(/'/g,"\\'")+'\')">👁️ Abrir</button>'+
+        '<button class="btn btn-sm" style="color:var(--red)" onclick="vssBorrarBrochure(\''+nombre.replace(/'/g,"\\'")+'\')">🗑️</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+async function vssAbrirBrochure(nombre){
+  const handle = window._vssFolderHandleBrochures;
+  if(!handle) return;
+  try {
+    const fileHandle = await handle.getFileHandle(nombre);
+    const file = await fileHandle.getFile();
+    const url = URL.createObjectURL(file);
+    window.open(url, '_blank');
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+  } catch(e){ alert('No se pudo abrir el archivo: '+e.message); }
+}
+async function vssBorrarBrochure(nombre){
+  const handle = window._vssFolderHandleBrochures;
+  if(!handle) return;
+  if(!confirm('¿Eliminar "'+nombre+'" de la carpeta? Esto borra el archivo real, no se puede deshacer.')) return;
+  try {
+    await handle.removeEntry(nombre);
+    renderBrochures();
+  } catch(e){ alert('No se pudo eliminar: '+e.message); }
+}
+async function vssSubirBrochure(){
+  const handle = window._vssFolderHandleBrochures;
+  if(!handle){ alert('Primero elegí una carpeta.'); return; }
+  const ok = await vssVerificarPermiso(handle);
+  if(!ok){ alert('Hace falta reautorizar el acceso a la carpeta — tocá "📂 Elegir carpeta" de nuevo.'); return; }
+  if('showOpenFilePicker' in window){
+    try {
+      const [fileHandle] = await window.showOpenFilePicker({multiple:false});
+      const file = await fileHandle.getFile();
+      await vssEscribirBrochure(handle, file);
+    } catch(e){ if(e.name!=='AbortError') alert('Error al subir: '+e.message); }
+  } else {
+    document.getElementById('brochure-input-fallback').click();
+  }
+}
+async function vssSubirBrochureDesdeInput(input){
+  const handle = window._vssFolderHandleBrochures;
+  if(!handle || !input.files.length) return;
+  await vssEscribirBrochure(handle, input.files[0]);
+  input.value = '';
+}
+async function vssEscribirBrochure(handle, file){
+  try {
+    const fileHandle = await handle.getFileHandle(file.name, {create:true});
+    const writable = await fileHandle.createWritable();
+    await writable.write(file);
+    await writable.close();
+    renderBrochures();
+    alert('✅ Subido: '+file.name);
+  } catch(e){ alert('No se pudo subir el archivo: '+e.message); }
 }
 
 // =======================================================
@@ -7419,6 +7537,7 @@ document.addEventListener('visibilitychange', function(){
 });
 // Reconecta la carpeta local vinculada (si hay una) sin pedir permiso — solo consulta
 vssRestaurarCarpeta();
+vssRestaurarCarpetaBrochures();
 // Reconecta Drive en silencio si ya había una sesión válida (sin popup)
 if(vssGTokenCargarLocal()) vssSyncSetBadge('ok'); else vssSyncSetBadge('noauth');
 // PRESUPUESTOS helpers =====================================
