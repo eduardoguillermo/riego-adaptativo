@@ -129,7 +129,7 @@
 
 <div class="layout">
 <nav class="sidebar">
-  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v2.4</p></div></div>
+  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v2.5</p></div></div>
 
   <div class="section-label">Introducción</div>
   <a href="#intro">🏠 ¿Qué es esta app?</a>
@@ -159,7 +159,6 @@
 
   <div class="section-label">Instalaciones</div>
   <a href="#instalaciones">📋 Pedidos de instalación</a>
-  <a href="#kitinst">🧰 Kit base de instalación</a>
 
   <div class="section-label">Mantenimiento</div>
   <a href="#mantenimientos">🛠️ Registros</a>
@@ -181,7 +180,7 @@
     <h1>💧 Riego Adaptativo</h1>
     <p>Manual del sistema administrativo — ciclo completo del negocio, de presupuesto a mantenimiento</p>
     <div class="hero-badges">
-      <span class="badge badge-red">✓ v2.4</span>
+      <span class="badge badge-red">✓ v2.5</span>
       <span class="badge badge-blue">✓ Sin servidor</span>
       <span class="badge badge-amber">✓ Datos locales</span>
     </div>
@@ -401,15 +400,6 @@
     <p><b>Pendiente → En curso → Completado</b> (o Cancelado). Antes de salir a instalar, "Confirmar salida de stock" descuenta del inventario todo el kit del pedido (avisa si falta algo). Al marcar <b>Completado</b>: el cliente pasa a estado "Completada", se agrega automáticamente una entrada al <a href="#ficha">historial OTA</a> del cliente ("Instalación inicial"), se guarda el técnico como nota, y se pregunta si hay materiales sobrantes para devolver al stock.</p>
   </section>
 
-  <!-- KIT BASE INSTALACION -->
-  <section class="section" id="kitinst">
-    <div class="section-header">
-      <span class="section-icon">🧰</span>
-      <div><div class="section-title">Kit base de instalación</div><div class="section-subtitle">Materiales comunes a toda instalación, aparte de los sensores</div></div>
-    </div>
-    <div class="note">📌 Esta pantalla existe de forma independiente al armado del pedido de instalación, que usa el kit de la línea de producto (ver <a href="#kit">Líneas de producto</a>). Sirve como referencia de materiales comunes que se pueden usar en cualquier instalación.</div>
-  </section>
-
 
   <!-- MANTENIMIENTO -->
   <section class="section" id="mantenimientos">
@@ -533,6 +523,13 @@
       <div class="changelog-entry">
       <div class="changelog-entry">
       <div class="changelog-entry">
+      <div class="changelog-entry">
+        <div class="changelog-version"><span class="v-num">v2.5</span><span class="changelog-tag tag-fix">fix</span></div>
+        <ul class="changelog-list">
+          <li>Sacado el "Kit base de instalación" del menú (Instalaciones) — estaba desconectado desde que el pedido de instalación pasó a usar el kit configurado en la línea de producto, y no tenía ningún uso real.</li>
+        </ul>
+      </div>
+
         <div class="changelog-version"><span class="v-num">v2.4</span><span class="changelog-tag tag-feature">feature</span></div>
         <ul class="changelog-list">
           <li><b>Envío de presupuesto por email con el PDF adjunto automático</b>: "📧 Email" ahora genera el PDF real en el momento (con jsPDF + html2canvas, mismo diseño que "📄 PDF" pero sin abrir ningún diálogo de impresión) y lo manda directo por Gmail, ya adjunto, sin pasos manuales. Si el presupuesto no tiene email cargado, si falla la generación del PDF, o si no se puede conectar con Google, cae automáticamente al envío manual de siempre (abrir Gmail con el texto listo para adjuntar a mano).</li>
@@ -727,7 +724,7 @@
           <li>Generación del pedido de instalación ahora es manual (antes automática al terminar la OT)</li>
           <li>Estética de Fabricación renovada: cards, badges de fase y checklist con un diseño más claro y espaciado</li>
           <li>Corregido: <code>var(--primary)</code> no existía en la hoja de estilos — 8 lugares del sistema (estado de instalación del cliente, kit por caja de Stock, N° de registro de mantenimiento, N° de orden de compra, barra de progreso de fabricación) se veían sin color de marca</li>
-          <li>Nota: el <a href="#kitinst">Kit base de instalación</a> quedó desconectado del armado del pedido en esta versión — ver aviso en esa sección</li>
+          <li>Nota: el Kit base de instalación quedó desconectado del armado del pedido en esa versión — ver aviso en esa sección</li>
         </ul>
       </div>
 
