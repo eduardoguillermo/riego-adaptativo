@@ -1924,17 +1924,21 @@ function generarPDFHTMLPres(id){
   // Ítems presupuestados con cantidad cargada, agrupados por sección (genérico, según línea)
   var linea=getLineaPres(p);
   var itemRows='';
+  var itemRowsMovil='';
   var seccionesPDF=[];
   (linea&&linea.itemsPresupuesto||[]).forEach(function(it){ if(seccionesPDF.indexOf(it.seccion)===-1) seccionesPDF.push(it.seccion); });
   seccionesPDF.forEach(function(seccion){
     var filasSec='';
+    var filasSecMovil='';
     (linea.itemsPresupuesto||[]).filter(function(it){return it.seccion===seccion;}).forEach(function(it){
       var i=p.precios&&p.precios[it.nombre];
       var qty=i?parseFloat(i.cant)||0:0;
       if(qty<=0) return;
       filasSec+='<tr><td>'+it.nombre+'</td><td style="text-align:center">'+qty+'</td></tr>';
+      filasSecMovil+='<tr><td>'+it.nombre+'</td><td class="mqty">x'+qty+'</td></tr>';
     });
     if(filasSec) itemRows+='<tr><td colspan="2" style="background:#f0f0f0;font-weight:700;font-size:10px;text-transform:uppercase">'+seccion+'</td></tr>'+filasSec;
+    if(filasSecMovil) itemRowsMovil+='<tr class="msecrow"><td colspan="2">'+seccion+'</td></tr>'+filasSecMovil;
   });
 
   const descRow=descVal>0?
@@ -2031,7 +2035,80 @@ function generarPDFHTMLPres(id){
       '<div style="text-align:right">'+num+' · Emitido por: '+(p.tecnico||'—')+'<br>Válido '+( p.validez||15)+' días · Vence: '+vence+'</div>'+
     '</div>';
 
-  return {css:CSS, body:body, num:num};
+  const bodyMovil=
+    '<div class="mh">'+
+      (LOGO?'<img src="'+LOGO+'" alt="'+empresa+'">':'')+
+      '<h1>'+empresa.toUpperCase()+'</h1>'+
+      '<p>Presupuesto de instalación</p>'+
+      '<div class="mpn">'+num+'</div>'+
+      '<div class="mps">Emitido: '+fecha+'</div>'+
+    '</div>'+
+    '<div class="mbody">'+
+
+    '<div class="mvalidez">⏱️ Validez: '+(p.validez||15)+' días corridos<br>Vence el '+vence+'</div>'+
+
+    '<div class="msec"><div class="mst">Datos del cliente</div>'+
+      '<div class="mfield"><div class="mfl">Nombre</div><div class="mfv">'+p.nombre+'</div></div>'+
+      '<div class="mfield"><div class="mfl">Teléfono</div><div class="mfv">'+p.tel+'</div></div>'+
+      '<div class="mfield"><div class="mfl">Dirección</div><div class="mfv">'+(p.dir||'—')+'</div></div>'+
+      '<div class="mfield"><div class="mfl">Barrio</div><div class="mfv">'+(p.barrio||'—')+'</div></div>'+
+    '</div>'+
+
+    '<div class="msec"><div class="mst">Sistema propuesto</div>'+
+      '<div class="mmb">'+(linea?linea.nombre:'—')+'</div>'+
+      (linea&&linea.descripcion?'<div class="mmdesc">'+linea.descripcion+'</div>':'')+
+    '</div>'+
+
+    (itemRows?
+    '<div class="msec"><div class="mst">Equipamiento y materiales</div>'+
+      '<table class="mt"><tbody>'+itemRowsMovil+'</tbody></table></div>':'')+
+
+    '<div class="msec"><div class="mst">Condiciones comerciales</div>'+
+      '<div class="mfield"><div class="mfl">Plazo de entrega</div><div class="mfv">'+(p.plazo||'—')+'</div></div>'+
+      '<div class="mfield"><div class="mfl">Forma de pago</div><div class="mfv">'+(p.formaPago||'—')+'</div></div>'+
+      '<div class="mfield"><div class="mfl">Garantía</div><div class="mfv">'+(p.garantia||'—')+'</div></div>'+
+      '<div class="mfield"><div class="mfl">Incluye</div><div class="mfv">'+(p.incluye||'—')+'</div></div>'+
+      (p.noIncluye?'<div class="mfield"><div class="mfl">No incluye</div><div class="mfv">'+p.noIncluye+'</div></div>':'')+
+    '</div>'+
+
+    '<div class="msec"><div class="mst">Valor de la cotización</div>'+
+      '<div class="mfield"><div class="mfl">'+(linea?linea.nombre:'Sistema')+' — instalación y configuración completa</div><div class="mfv">'+formatMonto(totalConMargen,p.moneda)+'</div></div>'+
+      (descVal>0?'<div class="mfield" style="color:#B71C1C"><div class="mfl">Descuento</div><div class="mfv">- '+formatMonto(descVal,p.moneda)+'</div></div>':'')+
+      '<div class="mtotal">TOTAL<br><span>'+formatMonto(totalFinal,p.moneda)+'</span></div>'+
+    '</div>'+
+    '</div>'+
+
+    '<div class="mleyenda">La presente propuesta es de carácter personal e intransferible, y ha sido elaborada específicamente para el inmueble y las condiciones relevadas. '+empresa+' se reserva el derecho de modificar los términos ante variaciones en los requerimientos o condiciones del sitio.</div>'+
+
+    '<div class="mfooter">'+
+      '<div>'+empresa+(cfgTel?' · '+cfgTel:'')+(cfgEmail?' · '+cfgEmail:'')+'</div>'+
+      '<div>'+num+' · Emitido por: '+(p.tecnico||'—')+'</div>'+
+      '<div>Válido '+(p.validez||15)+' días · Vence: '+vence+'</div>'+
+    '</div>';
+
+  const CSS_MOVIL='*{box-sizing:border-box;margin:0;padding:0}body{font-family:Segoe UI,Arial,sans-serif;color:#222;font-size:17px;line-height:1.45}'+
+    '.mh{background:#0D1B24;color:#fff;padding:20px 18px;text-align:center}'+
+    '.mh img{width:56px;height:56px;border-radius:50%;border:2px solid #256282;margin-bottom:8px}'+
+    '.mh h1{font-size:19px;font-weight:700}.mh p{font-size:12px;color:#aaa;margin-top:2px}'+
+    '.mpn{font-size:16px;font-weight:700;margin-top:10px}.mps{font-size:11px;color:#aaa;margin-top:2px}'+
+    '.mbody{padding:18px}.msec{margin-bottom:18px}'+
+    '.mst{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#256282;border-bottom:2px solid #256282;padding-bottom:5px;margin-bottom:10px}'+
+    '.mfield{background:#f8f8f8;border-radius:6px;padding:9px 12px;margin-bottom:7px}'+
+    '.mfield .mfl{font-size:10px;color:#999;font-weight:700;text-transform:uppercase;margin-bottom:2px}'+
+    '.mfield .mfv{font-size:16px;font-weight:500}'+
+    'table.mt{width:100%;border-collapse:collapse}'+
+    'table.mt td{padding:9px 4px;border-bottom:1px solid #eee;font-size:16px}'+
+    'table.mt td.mqty{text-align:right;font-weight:600;white-space:nowrap;padding-left:10px}'+
+    'table.mt tr.msecrow td{background:#f0f0f0;font-weight:700;font-size:12px;text-transform:uppercase;padding:7px 4px}'+
+    '.mvalidez{background:#FFF8E1;border:1px solid #FFD54F;border-radius:6px;padding:10px 14px;margin:0 18px 18px;font-size:15px;color:#7B4F00}'+
+    '.mmb{display:inline-block;background:#E3F2FD;color:#0D47A1;padding:5px 16px;border-radius:20px;font-weight:700;font-size:17px;margin-bottom:8px}'+
+    '.mmdesc{font-size:15px;color:#555;line-height:1.5}'+
+    '.mtotal{background:#0D1B24;color:#fff;border-radius:6px;padding:14px;text-align:center;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-top:4px}'+
+    '.mtotal span{display:block;font-size:24px;margin-top:4px;letter-spacing:0}'+
+    '.mleyenda{padding:14px 18px;background:#f0f0f0;border-top:1px solid #ddd;font-size:11px;color:#888;font-style:italic;line-height:1.5}'+
+    '.mfooter{padding:14px 18px;background:#f5f5f5;border-top:3px solid #256282;font-size:11px;color:#888;line-height:1.6}';
+
+  return {css:CSS, body:body, cssMovil:CSS_MOVIL, bodyMovil:bodyMovil, num:num};
 }
 
 function generarPDF(id){
@@ -3210,12 +3287,12 @@ function generarPresupuestoPDFBase64(id, callback){
     callback(null); return;
   }
   var cont = document.createElement('div');
-  cont.style.cssText = 'position:fixed;left:-99999px;top:0;width:800px;background:#fff;';
+  cont.style.cssText = 'position:fixed;left:-99999px;top:0;width:420px;background:#fff;';
   var styleTag = document.createElement('style');
-  styleTag.textContent = r.css;
+  styleTag.textContent = r.cssMovil;
   cont.appendChild(styleTag);
   var bodyDiv = document.createElement('div');
-  bodyDiv.innerHTML = r.body;
+  bodyDiv.innerHTML = r.bodyMovil;
   cont.appendChild(bodyDiv);
   document.body.appendChild(cont);
 
@@ -3223,7 +3300,7 @@ function generarPresupuestoPDFBase64(id, callback){
     if(document.body.contains(cont)) document.body.removeChild(cont);
     var imgData = canvas.toDataURL('image/jpeg', 0.92);
     var jsPDFCtor = window.jspdf.jsPDF;
-    var pdf = new jsPDFCtor('p','mm','a4');
+    var pdf = new jsPDFCtor('p','mm','a5');
     var pageWidth = pdf.internal.pageSize.getWidth();
     var pageHeight = pdf.internal.pageSize.getHeight();
     var imgWidth = pageWidth;
