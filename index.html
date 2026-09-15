@@ -82,6 +82,7 @@ function cerrarSplash(){
   <div class="ns collapsible" onclick="toggleNav(this)">📄 Comercial ▸</div>
   <div class="nav-section-items">
   <div class="ni" id="nav-presupuestos" onclick="goTo('presupuestos')"><span class="ni-icon">📄</span>Presupuestos</div>
+  <div class="ni" id="nav-brochures" onclick="goTo('brochures')"><span class="ni-icon">📽️</span>Brochures</div>
   <div class="ni" id="nav-gestion" onclick="goTo('gestion')"><span class="ni-icon">💰</span>Gestión económica</div>
   <div class="ni" id="nav-actas" onclick="goTo('actas')"><span class="ni-icon">📋</span>Actas de conformidad</div>
 
@@ -571,6 +572,20 @@ function cerrarSplash(){
             <tbody id="tbody-pres"></tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- BROCHURES -->
+    <div class="panel" id="panel-brochures">
+      <div class="sbar">
+        <span id="brochures-status" style="font-size:12px;color:var(--text2)">➖ No vinculada</span>
+        <button class="btn btn-p" onclick="vssSeleccionarCarpetaBrochures()">📂 Elegir carpeta</button>
+        <button class="btn" onclick="vssSubirBrochure()">📤 Subir archivo</button>
+        <input type="file" id="brochure-input-fallback" style="display:none" onchange="vssSubirBrochureDesdeInput(this)">
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">📽️ Brochures y presentaciones</div></div>
+        <div id="brochures-lista"></div>
       </div>
     </div>
 
