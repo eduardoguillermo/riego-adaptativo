@@ -220,10 +220,10 @@ function syncStockDesdeDrive(mostrarAlert){
 // NAV
 // =======================================================
 let curCid=null, curSub='datos';
-const PANELS=['clientes','alta','detalle','versiones','tipos','backup','presupuestos','stock','catalogo','movimientos','ordenes','config','reportes','proveedores','gestion','fondos','fabricacion','kit','instalaciones','kitinst','actas','mantenimientos'];
+const PANELS=['clientes','alta','detalle','versiones','tipos','backup','presupuestos','stock','catalogo','movimientos','ordenes','config','reportes','proveedores','gestion','fondos','fabricacion','kit','instalaciones','actas','mantenimientos'];
 
 // Mapa de panel -> ancla en instructivo.html (usado por el botón de ayuda contextual "?")
-const ANCLAS_AYUDA={clientes:'clientes',alta:'clientes',detalle:'ficha',versiones:'versiones',tipos:'tipos',backup:'backup',presupuestos:'presupuestos',stock:'stock',catalogo:'stock',movimientos:'movimientos',ordenes:'ordenes',config:'config',reportes:'reportes',proveedores:'proveedores',gestion:'gestion',fondos:'fondos',fabricacion:'fabricacion',kit:'kit',instalaciones:'instalaciones',kitinst:'kitinst',actas:'actas',mantenimientos:'mantenimientos'};
+const ANCLAS_AYUDA={clientes:'clientes',alta:'clientes',detalle:'ficha',versiones:'versiones',tipos:'tipos',backup:'backup',presupuestos:'presupuestos',stock:'stock',catalogo:'stock',movimientos:'movimientos',ordenes:'ordenes',config:'config',reportes:'reportes',proveedores:'proveedores',gestion:'gestion',fondos:'fondos',fabricacion:'fabricacion',kit:'kit',instalaciones:'instalaciones',actas:'actas',mantenimientos:'mantenimientos'};
 var _panelActual='clientes';
 function abrirAyudaPanel(){
   var ancla=ANCLAS_AYUDA[_panelActual]||'intro';
@@ -238,7 +238,7 @@ function goTo(p){
     const n=document.getElementById('nav-'+x);
     if(n) n.classList.toggle('on',x===p);
   });
-  const titles={clientes:'Clientes',alta:'Alta de cliente',detalle:'Ficha de cliente',versiones:'Versiones de software',tipos:'Tipos de sensor',backup:'Backup / Restaurar',presupuestos:'Presupuestos',stock:'Stock actual',catalogo:'Catálogo',movimientos:'Movimientos de stock',ordenes:'Órdenes de compra',fabricacion:'Órdenes de trabajo',kit:'Líneas de producto',instalaciones:'Pedidos de instalación',kitinst:'Kit base instalación',actas:'Actas de conformidad',mantenimientos:'Mantenimientos',fondos:'Movimiento de fondos',gestion:'Gestión económica',config:'Configuración',reportes:'Reportes',proveedores:'Proveedores'};
+  const titles={clientes:'Clientes',alta:'Alta de cliente',detalle:'Ficha de cliente',versiones:'Versiones de software',tipos:'Tipos de sensor',backup:'Backup / Restaurar',presupuestos:'Presupuestos',stock:'Stock actual',catalogo:'Catálogo',movimientos:'Movimientos de stock',ordenes:'Órdenes de compra',fabricacion:'Órdenes de trabajo',kit:'Líneas de producto',instalaciones:'Pedidos de instalación',actas:'Actas de conformidad',mantenimientos:'Mantenimientos',fondos:'Movimiento de fondos',gestion:'Gestión económica',config:'Configuración',reportes:'Reportes',proveedores:'Proveedores'};
   document.getElementById('ptitle').textContent=titles[p]||p;
   document.getElementById('tctx').textContent='';
   const pa=document.getElementById('pacts'); pa.innerHTML='';
@@ -253,7 +253,6 @@ function goTo(p){
   if(p==='fabricacion') renderFabricacion();
   if(p==='kit') renderLineasProducto();
   if(p==='instalaciones') renderInstalaciones();
-  if(p==='kitinst') renderKitInst();
   if(p==='actas') renderActas();
   if(p==='mantenimientos') renderMantenimientos();
   if(p==='presupuestos') renderPresupuestos();
@@ -6910,148 +6909,6 @@ function quitarMatInst(piId, idx){
 }
 
 // KIT BASE INSTALACION =====================================
-function renderKitInst(){
-  if(!DB.kitinst) DB.kitinst=[];
-  var ver=document.getElementById('kitinst-version');
-  if(ver) ver.textContent='Versión '+(DB.kitinstVersion||1)+' · '+(DB.kitinstFecha||today());
-
-  var tb=document.getElementById('tbody-kitinst');
-  if(!DB.kitinst.length){tb.innerHTML='<tr><td colspan="6" class="empty">Sin materiales en el kit base.</td></tr>';return;}
-
-  tb.innerHTML=DB.kitinst.map(function(item,i){
-    var comp=findComponente(item.compId)||{};
-    var stock=stockActual(item.compId);
-    var color=stock<item.cant?'var(--red)':stock<item.cant*2?'var(--amber)':'var(--green)';
-    return '<tr>'+
-      '<td style="font-family:monospace;font-size:11px">'+(comp.codigo||'—')+'</td>'+
-      '<td>'+(comp.desc||item.compNombre||'—')+'</td>'+
-      '<td style="text-align:center;font-weight:700">'+item.cant+'</td>'+
-      '<td>'+(comp.unidad||'—')+'</td>'+
-      '<td style="text-align:center;font-weight:700;color:'+color+'">'+stock+'</td>'+
-      '<td style="display:flex;gap:3px">'+
-        '<button class="btn btn-sm" onclick="modalKitInstItem('+i+')">✏️</button>'+
-        '<button class="btn btn-sm" style="color:var(--red)" onclick="eliminarKitInstItem('+i+')">🗑️</button>'+
-      '</td>'+
-    '</tr>';
-  }).join('');
-}
-
-function modalKitInstEditar(){
-  // Filter components with area Instalacion
-  var compsInst = DB.componentes.filter(function(c){
-    return c.area === 'Instalacion';
-  }).sort(function(a,b){var sa=(a.desc||'').replace(/^[^a-zA-ZáéíóúÁÉÍÓÚñÑ]+/,'').toLowerCase();var sb=(b.desc||'').replace(/^[^a-zA-ZáéíóúÁÉÍÓÚñÑ]+/,'').toLowerCase();return sa.localeCompare(sb,'es');});
-
-  if(!compsInst.length){
-    alert('No hay componentes con área "Instalacion" en el catálogo.');
-    return;
-  }
-
-  // Build kit map for quick lookup
-  var kitMap = {};
-  (DB.kitinst||[]).forEach(function(item){
-    kitMap[item.compId] = item.cant;
-  });
-
-  // Build table with all Instalacion components
-  var rows = compsInst.map(function(c){
-    var cant = kitMap[c.id]||0;
-    var stock = stockActual(c.id);
-    var stockColor = stock<=0?'var(--red)':stock<cant?'var(--amber)':'var(--green)';
-    return '<tr style="border-bottom:1px solid var(--border)">'+
-      '<td style="padding:5px 10px;font-family:monospace;font-size:11px">'+c.codigo+'</td>'+
-      '<td style="padding:5px 10px;font-size:12px">'+c.desc+'</td>'+
-      '<td style="padding:5px 10px;font-size:11px;color:var(--text2)">'+c.unidad+'</td>'+
-      '<td style="padding:5px 10px;font-weight:700;color:'+stockColor+'">'+stock+'</td>'+
-      '<td style="padding:5px 10px">'+
-        '<input type="number" min="0" value="'+cant+'" data-compid="'+c.id+'" '+
-        'style="width:70px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;text-align:center">'+
-      '</td>'+
-    '</tr>';
-  }).join('');
-
-  var body =
-    '<div style="font-size:11px;color:var(--text2);margin-bottom:10px">'+
-      'Ingresá la cantidad de cada componente. Poné <strong>0</strong> para excluirlo del kit.'+
-    '</div>'+
-    '<div style="max-height:400px;overflow-y:auto">'+
-    '<table style="width:100%;border-collapse:collapse">'+
-    '<thead><tr style="background:var(--surface2);position:sticky;top:0">'+
-      '<th style="padding:6px 10px;font-size:10px;text-align:left">Código</th>'+
-      '<th style="padding:6px 10px;font-size:10px;text-align:left">Descripción</th>'+
-      '<th style="padding:6px 10px;font-size:10px;text-align:left">Unidad</th>'+
-      '<th style="padding:6px 10px;font-size:10px;text-align:center">Stock</th>'+
-      '<th style="padding:6px 10px;font-size:10px;text-align:center">Cantidad en kit</th>'+
-    '</tr></thead>'+
-    '<tbody>'+rows+'</tbody></table></div>';
-
-  openModal('Editar kit base de instalación', body, function(){
-    var inputs = document.querySelectorAll('#mbox input[data-compid]');
-    var newKit = [];
-    inputs.forEach(function(input){
-      var compId = input.dataset.compid;
-      var cant = parseFloat(input.value)||0;
-      if(cant > 0){
-        var comp = findComponente(compId)||{};
-        newKit.push({
-          compId: compId,
-          compCodigo: comp.codigo||'',
-          compNombre: comp.desc||'',
-          cant: cant
-        });
-      }
-    });
-    DB.kitinst = newKit;
-    DB.kitinstVersion = (parseInt(DB.kitinstVersion||0)+1);
-    DB.kitinstFecha = today();
-    save();
-    renderKitInst();
-    return true;
-  });
-}
-
-function modalKitInstItem(idx){
-  // Keep for edit individual items from table
-  var item=idx>=0?(DB.kitinst[idx]||{}):null;
-  var compsInst=[...DB.componentes].filter(function(c){return c.area==='Instalacion';}).sort(function(a,b){var sa=(a.desc||'').replace(/^[^a-zA-ZáéíóúÁÉÍÓÚñÑ]+/,'').toLowerCase();var sb=(b.desc||'').replace(/^[^a-zA-ZáéíóúÁÉÍÓÚñÑ]+/,'').toLowerCase();return sa.localeCompare(sb,'es');});
-  var compSel=compsInst.map(function(c){
-    return '<option value="'+c.id+'"'+(item&&item.compId===c.id?' selected':'')+'>'+c.codigo+' — '+c.desc+'</option>';
-  }).join('');
-
-  openModal(idx>=0?'Editar material del kit':'Agregar material al kit',
-    '<div class="fg2">'+
-      '<div class="fg full"><label>Componente (área Instalación)</label>'+
-        '<select id="ki-comp" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;width:100%">'+
-          '<option value="">-- seleccionar --</option>'+compSel+
-        '</select></div>'+
-      '<div class="fg"><label>Cantidad</label>'+
-        '<input id="ki-cant" type="number" min="1" value="'+(item?item.cant:1)+'"></div>'+
-    '</div>',
-    function(){
-      var compId=document.getElementById('ki-comp').value;
-      var cant=parseFloat(document.getElementById('ki-cant').value)||0;
-      if(!compId||!cant){alert('Seleccioná un componente e ingresá la cantidad.');return false;}
-      var comp=findComponente(compId)||{};
-      var newItem={compId:compId,compCodigo:comp.codigo||'',compNombre:comp.desc||'',cant:cant};
-      if(idx>=0){DB.kitinst[idx]=newItem;}else{DB.kitinst.push(newItem);}
-      DB.kitinstVersion=(parseInt(DB.kitinstVersion||0)+1);
-      DB.kitinstFecha=today();
-      save(); renderKitInst(); return true;
-    }
-  );
-}
-
-
-function eliminarKitInstItem(idx){
-  if(!confirm('¿Eliminar este material del kit base?')) return;
-  DB.kitinst.splice(idx,1);
-  DB.kitinstVersion=(parseInt(DB.kitinstVersion||0)+1);
-  DB.kitinstFecha=today();
-  save(); renderKitInst();
-}
-
-
-
 function toggleNav(el){
   var items = el.nextElementSibling;
   if(!items||!items.classList.contains('nav-section-items')) return;
