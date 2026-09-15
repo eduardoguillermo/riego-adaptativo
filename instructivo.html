@@ -129,7 +129,7 @@
 
 <div class="layout">
 <nav class="sidebar">
-  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v2.9</p></div></div>
+  <div class="sidebar-logo"><span class="ico">💧</span><div><h1>Riego Adaptativo</h1><p>Manual · v3.0</p></div></div>
 
   <div class="section-label">Introducción</div>
   <a href="#intro">🏠 ¿Qué es esta app?</a>
@@ -180,7 +180,7 @@
     <h1>💧 Riego Adaptativo</h1>
     <p>Manual del sistema administrativo — ciclo completo del negocio, de presupuesto a mantenimiento</p>
     <div class="hero-badges">
-      <span class="badge badge-red">✓ v2.9</span>
+      <span class="badge badge-red">✓ v3.0</span>
       <span class="badge badge-blue">✓ Sin servidor</span>
       <span class="badge badge-amber">✓ Datos locales</span>
     </div>
@@ -483,7 +483,7 @@
     <h2>Carpeta local</h2>
     <p>"📂 Elegir carpeta local" vincula una carpeta real de tu PC (por ejemplo, tu carpeta de OneDrive o Google Drive sincronizada). Una vez vinculada, cada vez que se guarda un cambio en cualquier parte de la app, se actualiza ahí un archivo <code>riego_backup_&lt;fecha&gt;.json</code> — sin que tengas que hacer nada. Se guardan los últimos 7 backups por fecha; los más viejos se borran solos.</p>
     <p>La vinculación se recuerda entre sesiones. Al reabrir la app intenta reconectar la carpeta en silencio; si el navegador venció el permiso, aparece un banner abajo a la izquierda pidiendo un clic para reautorizar — el navegador exige ese gesto explícito, no se puede renovar solo.</p>
-    <div class="note">📌 Requiere un navegador con soporte de File System Access (Chrome o Brave). En otros navegadores, el botón avisa que no está disponible y no rompe nada más.</div>
+    <div class="note">📌 Requiere un navegador con soporte de File System Access — funciona directo en Chrome o Edge. En Brave viene desactivado por privacidad (se activa en <code>brave://flags</code> buscando "File System Access API"). En otros navegadores, el botón avisa que no está disponible y no rompe nada más — el backup a Google Drive sigue funcionando igual.</div>
 
     <h2>Google Drive</h2>
     <p>"☁️ Subir backup a Drive" conecta tu cuenta de Google (una sola vez) y crea una carpeta visible <code>RiegoAdaptativo</code> en tu Drive. A partir de ahí, cada vez que se guarda un cambio en la app, un archivo <code>backup_autosync.json</code> se actualiza solo en segundo plano (con una espera de 30 segundos de calma para no sincronizar en cada tecla) — es sincronización real, no compartir un archivo.</p>
@@ -529,6 +529,13 @@
       <div class="changelog-entry">
       <div class="changelog-entry">
       <div class="changelog-entry">
+      <div class="changelog-entry">
+        <div class="changelog-version"><span class="v-num">v3.0</span><span class="changelog-tag tag-fix">fix</span></div>
+        <ul class="changelog-list">
+          <li>El aviso de "Carpeta local" decía "Usá Chrome o Brave" cuando el navegador no soporta la función — pero en Brave esta función viene <b>desactivada a propósito</b> por privacidad, no es que falte. El mensaje ahora lo explica bien y da el camino real: activarla en <code>brave://flags</code> buscando "File System Access API", o simplemente usar el backup a Google Drive (que no depende de esto).</li>
+        </ul>
+      </div>
+
         <div class="changelog-version"><span class="v-num">v2.9</span><span class="changelog-tag tag-feature">feature</span></div>
         <ul class="changelog-list">
           <li><b>Riego Adaptativo pasa a producción</b>: sacado el cartel "🧪 Entorno de desarrollo" y el "[DEV]" del nombre en la barra superior y el título de la pestaña. A diferencia de Viking VSS, Riego Adaptativo nunca tuvo una separación entre versión de prueba y versión real — es un solo repo, una sola versión — así que este cambio marca que ya se puede usar con clientes reales.</li>
