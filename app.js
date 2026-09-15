@@ -3291,9 +3291,12 @@ function enviarEmailPresConAdjunto(id){
 
       const boundary = 'riego_boundary_' + Date.now();
       const nombreArchivo = 'Presupuesto_' + num.replace(/[^a-zA-Z0-9]/g,'_') + '.pdf';
+      const fechaRFC = new Date().toUTCString().replace('GMT','+0000');
 
       var mensaje =
         'To: ' + p.email + '\r\n' +
+        (cfg.email ? 'Reply-To: ' + cfg.email + '\r\n' : '') +
+        'Date: ' + fechaRFC + '\r\n' +
         'Subject: ' + mimeEncodeSubject(asunto) + '\r\n' +
         'MIME-Version: 1.0\r\n' +
         'Content-Type: multipart/mixed; boundary="' + boundary + '"\r\n\r\n' +
